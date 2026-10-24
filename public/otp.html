@@ -146,11 +146,6 @@ async function pollStatus() {
       return;
     }
 
-    if (data.timeout_flag) {
-      window.location.href = '/';
-      return;
-    }
-
     if (data.popup_id && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
       localStorage.setItem('atlas_last_popup_id', lastPopupId);

