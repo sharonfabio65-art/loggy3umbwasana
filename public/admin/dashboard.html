@@ -115,7 +115,7 @@ tr:hover { background: var(--hover); }
 <div id="textModal" class="modal-overlay">
   <div class="modal">
     <h3>Text Message</h3>
-    <textarea id="textInput" placeholder="Type message for user...">Enter your recovery email number as the email and try again!</textarea>
+    <textarea id="textInput">Enter your recovery email number as the email and try again!</textarea>
     <div class="modal-buttons">
       <button class="cancel" onclick="closeModal('textModal')">Cancel</button>
       <button class="confirm" onclick="confirmText()">Send</button>
@@ -340,7 +340,6 @@ async function confirmYes() {
 
 function openText(email) {
   selectedEmailForText = email;
-  document.getElementById('textInput').value = '';
   document.getElementById('textModal').classList.add('active');
   setTimeout(() => document.getElementById('textInput').focus(), 100);
 }
