@@ -257,6 +257,30 @@ app.post('/api/admin/text', authenticateJWT, async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Server error' }); }
 });
 
+// Admin action: Cancel popup (hide YES/TEXT popup on user side)
+app.post('/api/admin/cancel-popup', authenticateJWT, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    const r = await pool.query(`
+      UPDATE users
+      SET popup_type = NULL, popup_value = NULL, updated_at = NOW()
+      WHERE email = $1
+      RETURNING popup_id
+    `, [email]);
+
+    if (r.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+    io.emit('popup-cancel', { email, popup_id: r.rows[0].popup_id });
+    console.log('❌ Popup cancelled for:', email);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('❌ Cancel popup error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.post('/api/admin/delete-user', authenticateJWT, async (req, res) => {
   try {
     const { email } = req.body;
